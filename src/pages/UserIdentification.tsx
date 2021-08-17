@@ -15,29 +15,60 @@ import fonts from '../styles/fonts';
 import { BottonButton } from '../components/BottonButton';
 import { useNavigation } from '@react-navigation/core';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
+import { checkEmail } from '../libs/storage'
+import { useContext } from 'react';
+import { DataContext } from '../contexts/DataContext';
 
 export function UserIdentification() {
 
-  const [name, setName] = useState<string>();
+  const {  } = useContext(DataContext);
+
+  const [email, setEmail] = useState<string>('');
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
 
   const navigation = useNavigation();
 
-  async function handleSubmit() {
 
-    if (!name) {
-      return Alert.alert('Me diz como chamar você?');
+  // DATA
+
+  useEffect(() => {
+    async function data() {
+      const emailSaved = await AsyncStorage.getItem('@teoapp:userEmail');
+      console.log(emailSaved)
+      setEmail(emailSaved || '')
     }
 
-    await AsyncStorage.setItem('@teoapp:username', name);
+    data()
+  }, [])
 
-    navigation.navigate('Begin')
+  async function handleSubmit() {
+
+    const result =  /[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/.test(email)
+
+    if (!result) {
+      return Alert.alert('Precisamos de um email válido!');
+    }
+
+    if (!email) {
+      return Alert.alert('Precisamos do seu email!');
+    }
+
+    try {
+      await checkEmail(email)
+      navigation.navigate('Begin')
+    } catch (err) {
+      Alert.alert('Algo deu errado.')
+      console.log(err)
+    }
+
+
   }
 
   function handleLogin() {
 
-    navigation.navigate('')
+    navigation.navigate('Login')
   }
 
   function handleFocus() {
@@ -46,13 +77,14 @@ export function UserIdentification() {
 
   function handleIsfilled() {
     setIsFocused(false);
-    setIsFilled(!!name);
+    setIsFilled(!!email);
   }
 
   function handleInputChange(value: string) {
     setIsFilled(!!value)
-    setName(value);
+    setEmail(value);
   }
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,16 +93,16 @@ export function UserIdentification() {
           <View style={styles.header}>
 
             <Text style={styles.title}>
-              Como podemos {'\n'}
-          te chamar?
-          </Text>
+              Por favor, digite seu email?
+            </Text>
 
             <TextInput
+              value={email}
               style={[
                 styles.input,
                 (isFocused || isFilled) && {borderColor: colors.green}
               ]}
-              placeholder='Digite seu nome'
+              placeholder='Email'
               onChangeText={handleInputChange}
               onFocus={handleFocus}
               onBlur={handleIsfilled}
@@ -116,21 +148,23 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 24,
-    marginTop: 54,
+    width: '100%',
+    fontSize: 16,
+    marginTop: 36,
     color: colors.gray_medium,
+    fontFamily: fonts.text_medium,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'left',
   },
 
   input: {
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderColor: colors.gray_medium,
     borderRadius: 5,
-    marginTop: 24,
+    marginTop: 16,
     width: '100%',
     padding: 10,
-    textAlign: 'center'
+    textAlign: 'left'
   },
 
   body: {

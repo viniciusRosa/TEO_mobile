@@ -10,27 +10,39 @@ export function Begin() {
   const navigation = useNavigation();
 
   function handleButton() {
-    navigation.navigate('Dashboard');
+    navigation.navigate('UserForm');
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>
-            Olá Vinicius,
-          </Text>
-          <Text style={styles.subtitle}>
-            Vamos Começar?
-          </Text>
-        </View>
 
-
-        <View style={styles.footer}>
-          <BottonButton text={ 'Começar' } onPress={handleButton}/>
-        </View>
-
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          Ok, {'\n'}Vamos Começar?
+        </Text>
       </View>
+
+      <View>
+        <View style={styles.bodyText}>
+          <Text style={styles.bodyTextTitle}>O primeiro passo: </Text>
+          <Text style={styles.bodyTextStep}>Precisamos de alguns dados pessoais.</Text>
+        </View>
+
+        <View style={styles.bodyText}>
+          <Text style={styles.bodyTextTitle}>O segundo passo:  </Text>
+          <Text style={styles.bodyTextStep}>Nos informe seus dados escolares.</Text>
+        </View>
+
+        <View style={styles.bodyText}>
+          <Text style={styles.bodyTextTitle}>E por fim: </Text>
+          <Text style={styles.bodyTextStep}>Realize  o pedido da sua vaga.</Text>
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        <BottonButton text={'Começar'} onPress={handleButton} />
+      </View>
+
     </SafeAreaView>
   )
 }
@@ -38,49 +50,53 @@ export function Begin() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  content: {
-    flex: 1,
-    alignItems: 'center',
     justifyContent: 'flex-start',
-    marginTop: 56,
+    alignItems: 'center',
   },
 
   header: {
-    marginTop: 56,
-    marginRight: 56,
+    width: '100%',
+    marginVertical: 40,
+    marginLeft: 32
 
   },
 
   title: {
     fontFamily: fonts.title,
-    fontSize: 48,
+    fontSize: 32,
     color: colors.gray_medium,
     fontWeight: 'bold',
     textAlign: 'left',
+    marginVertical: 16
+
   },
 
-  subtitle: {
-    textAlign: 'left',
-    fontSize: 24,
+  bodyText: {
+    marginVertical: 16,
+    marginHorizontal: 8
+  },
+
+  bodyTextTitle: {
+    fontFamily: fonts.title,
+    fontSize: 16,
+    color: colors.gray,
+    marginBottom: 8
+
+  },
+
+  bodyTextStep: {
+    marginLeft: 24,
     fontFamily: fonts.text_medium,
-    color: colors.gray
-  },
-
-  body: {
-    marginHorizontal: 40,
-    marginTop: 20,
-    marginBottom: 88,
-
+    fontSize: 16,
+    color: colors.gray_medium
   },
 
   footer: {
     position: 'absolute',
     width: '100%',
     bottom: 0
-  },
+  }
+
+
 })
 

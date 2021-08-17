@@ -10,7 +10,7 @@ interface ButtonProps extends TouchableOpacityProps {
 export function BottonButton({ text, ...rest }: ButtonProps) {
   return (
 
-    <TouchableOpacity style={styles.button} {...rest}>
+    <TouchableOpacity style={styles.button} {...rest} >
       <Text style={styles.textButton}>
         { text }
       </Text>
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   textButton: {
     color: colors.white,
     fontFamily: fonts.text_medium,
-    fontSize: 24
+    fontSize: 18
   }
 
 })

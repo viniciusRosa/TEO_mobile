@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import AppLoading from 'expo-app-loading'
+import AppLoading from 'expo-app-loading';
+import { DataProvider } from './src/contexts/DataContext';
 // import {
 //   useFonts,
 //   Jost_400Regular,
@@ -29,7 +30,9 @@ if (!fontsLoaded) {
   return (
     <>
       <StatusBar style="auto" />
-      <Routes />
+      <DataProvider>
+        <Routes />
+      </DataProvider>
     </>
   );
 }
