@@ -182,10 +182,8 @@ export function TransporteScreen() {
           </View>
         }
 
-
         </View>
       </ScrollView>
-
 
     </View >
   )

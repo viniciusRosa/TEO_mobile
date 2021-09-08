@@ -6,6 +6,7 @@ import { Dashboard } from '../pages/Dashboard';
 import { UserScreen } from '../pages/UserScreen';
 import { SchoolScreen } from '../pages/SchoolScreen';
 import { TransporteScreen } from '../pages/TransportScreen';
+import { TestPage } from '../pages/TestPage';
 
 
 const AppTap = createBottomTabNavigator();
@@ -60,6 +61,16 @@ const AuthTab = () => (
         options={{
           tabBarIcon: ({ size, color }) => (
             <FontAwesome5 name='user-alt' size={size} color={color} />
+          )
+        }}
+       />
+
+      <AppTap.Screen
+        name='Teste'
+        component={TestPage}
+        options={{
+          tabBarIcon: ({ size, color }) => (
+            <FontAwesome5 name='bug' size={size} color={color} />
           )
         }}
        />
