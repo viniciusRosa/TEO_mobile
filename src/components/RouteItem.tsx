@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler'
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 interface PathItem {
   id: string;
@@ -34,10 +35,43 @@ export function RouteItem({
         styles.content,
         active && styles.contentActive
         ]}>
-        <Text>
-          {data.name}
-          {data.shift}
-        </Text>
+        <View style={styles.columnContent}>
+          <View style={styles.columnleft}>
+            <FontAwesome5 name="bus" size={48} color={colors.gray_medium} />
+            <Text>
+              {data.name}
+            </Text>
+          </View>
+
+          <View style={styles.columnRight}>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.title}>Turno: </Text>
+              <Text>
+                {data.shift}
+              </Text>
+
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.title}>Horário: </Text>
+            </View>
+            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+              <View style={{flexDirection: 'row'}}>
+                <Text>07:00</Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <Text>07:45</Text>
+              </View>
+            </View>
+
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.title}>Rota: </Text>
+              <Text>
+                {data.shift}
+              </Text>
+
+            </View>
+          </View>
+        </View>
       </View>
 
     </RectButton>
@@ -55,9 +89,8 @@ const styles = StyleSheet.create({
   },
 
   containerActive: {
-    // fontFamily: fonts.heading,
     color: colors.green,
-    // backgroundColor: colors.green
+
   },
 
   content: {
@@ -68,11 +101,33 @@ const styles = StyleSheet.create({
     borderColor: colors.gray_medium,
     color: colors.gray_medium,
     fontFamily: fonts.text_medium,
+    padding: 10
   },
 
   contentActive: {
     borderColor: colors.green,
     color: colors.green,
     fontFamily: fonts.text_medium
+  },
+
+  columnContent: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+
+  columnleft: {
+    width: '35%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  columnRight: {
+    width: '65%',
+    justifyContent: 'center',
+  },
+
+  title: {
+    fontWeight: 'bold'
   }
+
 })

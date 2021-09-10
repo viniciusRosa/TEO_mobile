@@ -17,6 +17,8 @@ import { useData } from '../contexts/DataContext'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteItem } from '../components/RouteItem';
 import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location'
+import MapViewDirections from 'react-native-maps-directions';
 
 interface FormData {
   order: string;
@@ -27,14 +29,42 @@ export function OrderTransport() {
   const navigation = useNavigation();
 
   const [routeSelected, setRouteSelected] = useState('')
+  const [inicialPosition, setInicialPosition] = useState <[number, number]> ([0, 0])
 
   const { createUser, orderTransport } = useData();
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
 
+  async function loadPosition() {
+     await Location.requestForegroundPermissionsAsync();
+     const { status } = await Location.getForegroundPermissionsAsync();
+    console.log(status)
+
+
+    if (status !== 'granted') {
+      Alert.alert('Oooops...', 'Precesamos de sua permissão');
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+
+
+     setInicialPosition([
+        latitude,
+        longitude
+    ])
+
+    console.log(Number(inicialPosition[0]), inicialPosition[1])
+
+}
+
+const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
 
   useEffect(() => {
-    //createUser() ->
+
+    loadPosition();
+
   }, [])
 
   function handleRoteSelected(id: string) {
@@ -122,11 +152,10 @@ export function OrderTransport() {
     { latitude: -29.8928138, longitude: -50.2610572 },
     { latitude: -29.8878367, longitude: -50.270051 },
     { latitude: -29.8959559, longitude: -50.2725517 },
-    // { latitude: 37.7734153, longitude: -122.4577787 },
-    // { latitude: 37.7948605, longitude: -122.4596065 },
-    // { latitude: 37.8025259, longitude: -122.4351431 }
   ]
 
+  const initial = { latitude: inicialPosition[0],
+    longitude: inicialPosition[1], latitudeDelta: 0.9, longitudeDelta: 0.9 }
 
   return (
     <View style={[styles.container, styles.androidSafeArea]}>
@@ -139,31 +168,39 @@ export function OrderTransport() {
 
       <View style={styles.wrapper}>
         <Text style={styles.title}>
-          Me candidatar a uma vaga
+          Escolha sua rota
         </Text>
 
       </View>
-
       <View style={styles.mapContainer}>
-        <MapView style={styles.map}>
+      { inicialPosition[0] !== 0 && (
+        <MapView style={styles.map}
+        loadingEnabled={inicialPosition[0] === 0}
+        initialRegion={{
+          latitude: Number(inicialPosition[0]),
+          longitude: Number(inicialPosition[1]),
+          latitudeDelta: 0.050,
+          longitudeDelta: 0.050
+        }}
+        >
+          <Marker coordinate={coordinates[0]}/>
+          <Marker coordinate={coordinates[1]}/>
 
-        {coordinates.map(point => (
+          <MapViewDirections
+            origin={coordinates[0]}
+            destination={coordinates[1]}
+            apikey={GOOGLE_MAPS_APIKEY}
 
-<Marker key={String(point.latitude)}  coordinate={{
-    latitude: point.latitude,
-    longitude: point.longitude,
-}}
->
-
-</Marker>
-
-))}
+            strokeWidth={10}
+            strokeColor={colors.green}
+  />
 
         </MapView>
+      )}
       </View>
 
 
-      <ScrollView style={[styles.body, styles.routesWrapper]}>
+      <View style={[styles.body]}>
 
         <FlatList
           data={data}
@@ -172,13 +209,16 @@ export function OrderTransport() {
             <RouteItem
               data={item}
               active={item.id === routeSelected}
-              onPress={() => { handleRoteSelected(item.id) }}
+              // onPress={() => { handleRoteSelected(item.id) }}
+              onPress={() => { loadPosition() }}
+
             />
           )}
           contentContainerStyle={styles.routeList}
+
         />
 
-      </ScrollView>
+      </View>
 
       <View style={styles.submitButton}>
         <Button
@@ -221,8 +261,6 @@ const styles = StyleSheet.create({
 
   body: {
     flex: 1,
-    // width: '86%',
-    // marginTop: 64
   },
 
   wrapper: {
@@ -235,46 +273,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 25 : 0
   },
 
-  ImageView: {
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-
-  camera: {
-    borderRadius: 190 / 2,
-    borderWidth: 2,
-    borderColor: colors.gray_medium,
-    marginBottom: 10
-  },
-
-  thumbnail: {
-    width: 150,
-    height: 150,
-    borderRadius: 160 / 2,
-    margin: 10,
-    resizeMode: 'cover',
-  },
-
-
-  bodyText: {
-    marginVertical: 16,
-    marginHorizontal: 8
-  },
-
-  bodyTextTitle: {
-    fontFamily: fonts.title,
-    fontSize: 16,
-    color: colors.gray,
-    marginBottom: 8
-
-  },
-
   submitButton: {
-    width: '90%',
-    marginVertical: 16
-  },
-
-  footer: {
     position: 'absolute',
     width: '100%',
     bottom: 0
@@ -282,39 +281,31 @@ const styles = StyleSheet.create({
 
   // routes list
 
-  routesWrapper: {
-    borderWidth: 0.5,
-    borderColor: colors.gray_medium,
-    borderRadius: 12,
-    marginBottom: 16,
-    width: '90%'
-  },
-
   routeList: {
-    flex: 1,
     justifyContent: 'center',
     margin: 10,
-    // marginVertical: 32,
-    // marginBottom: 32,
   },
 
   // map view
 
   mapContainer: {
     flex: 1,
-    width: '90%',
+    width: '100%',
+    height: '100%',
     borderRadius: 12,
     overflow: 'hidden',
     marginTop: 16,
     marginBottom: 16,
+    paddingHorizontal: 10
 
-},
+  },
 
-map: {
+  map: {
     width: '100%',
     height: '100%',
-},
+  },
 
+  mapStyle: {
+  color: 'red'
+  }
 })
-
-// https://www.google.com.br/maps/dir/-29.8928138,-50.2610572/-29.8878367,-50.270051/-29.8959559,-50.2725517/-29.9038089,-50.257088/-29.8936994,-50.2394043/@-29.8955439,-50.2740386,14.29z/data=!4m2!4m1!3e0
