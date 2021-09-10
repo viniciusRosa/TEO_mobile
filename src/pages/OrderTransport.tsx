@@ -19,6 +19,7 @@ import { RouteItem } from '../components/RouteItem';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location'
 import MapViewDirections from 'react-native-maps-directions';
+import { googleApiKey } from '../../keys'
 
 interface FormData {
   order: string;
@@ -59,7 +60,7 @@ export function OrderTransport() {
 
 }
 
-const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
+const GOOGLE_MAPS_APIKEY = googleApiKey;
 
   useEffect(() => {
 
@@ -95,10 +96,6 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
     }
 
   };
-
-  function handleButton() {
-    navigation.navigate('UserForm');
-  }
 
   const data = [
     {
@@ -170,8 +167,8 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
         <Text style={styles.title}>
           Escolha sua rota
         </Text>
-
       </View>
+
       <View style={styles.mapContainer}>
       { inicialPosition[0] !== 0 && (
         <MapView style={styles.map}
@@ -181,8 +178,8 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
           longitude: Number(inicialPosition[1]),
           latitudeDelta: 0.050,
           longitudeDelta: 0.050
-        }}
-        >
+          }}>
+
           <Marker coordinate={coordinates[0]}/>
           <Marker coordinate={coordinates[1]}/>
 
@@ -190,15 +187,12 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
             origin={coordinates[0]}
             destination={coordinates[1]}
             apikey={GOOGLE_MAPS_APIKEY}
-
             strokeWidth={10}
             strokeColor={colors.green}
-  />
-
+          />
         </MapView>
       )}
       </View>
-
 
       <View style={[styles.body]}>
 
@@ -215,9 +209,7 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
             />
           )}
           contentContainerStyle={styles.routeList}
-
         />
-
       </View>
 
       <View style={styles.submitButton}>
@@ -227,6 +219,7 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyD4UBzEEnjlx7ccki3VSS1sp0hgx-IknrU';
           onPress={handleSubmit(onSubmit)}
         />
       </View>
+
     </View>
   )
 }
