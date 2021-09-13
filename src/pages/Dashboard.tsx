@@ -163,7 +163,6 @@ export function Dashboard() {
         </View>
       </ScrollView>
 
-
     </View>
   )
 }
@@ -274,7 +273,5 @@ const styles = StyleSheet.create({
   buttonIcon: {
     marginRight: 20
   }
-
-
 })
 

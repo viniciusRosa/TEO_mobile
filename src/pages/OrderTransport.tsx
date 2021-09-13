@@ -5,13 +5,12 @@ import {
   StyleSheet,
   FlatList,
   Platform,
-  ScrollView,
   Button
 } from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/core';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Alert } from 'react-native';
 import { useData } from '../contexts/DataContext'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,28 +18,84 @@ import { RouteItem } from '../components/RouteItem';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location'
 import MapViewDirections from 'react-native-maps-directions';
-import { googleApiKey } from '../../keys'
+import { googleApiKey } from '../../keys';
 
 interface FormData {
   order: string;
-
 }
+
+const data = [
+  {
+    "id": "asdadqwdqwd",
+    "name": "Rota 1",
+    "shift": "Manha",
+    "schedule": {
+      "start": "07:00",
+      "final": "07:45"
+    },
+    "points": [
+      {
+        "id": "asdasdasd",
+        "adress": "Rua 1",
+        "latitude": -29.8928138,
+        "longitude": -50.2610572
+      },
+      {
+        "id": "asdasdasd2",
+        "adress": "Rua 2",
+        "latitude": -29.8878367,
+        "longitude": -50.270051
+      }
+    ]
+  },
+
+  {
+    "id": "asdadqwdqwdqwe",
+    "name": "Rota 1",
+    "shift": "Manha",
+    "schedule": {
+      "start": "07:00",
+      "final": "07:45"
+    },
+    "points": [
+      {
+        "id": "asdasdasd123",
+        "adress": "Rua 1",
+        "latitude": -29.8928138,
+        "longitude": -50.2610572
+      },
+      {
+        "id": "asdasdasd2qwe",
+        "adress": "Rua 2",
+        "latitude": -29.8878367,
+        "longitude": -50.270051
+      }
+    ]
+  },
+]
 
 export function OrderTransport() {
   const navigation = useNavigation();
+  const GOOGLE_MAPS_APIKEY = googleApiKey;
 
+  const [routes, setRoutes] = useState([])
   const [routeSelected, setRouteSelected] = useState('')
   const [inicialPosition, setInicialPosition] = useState <[number, number]> ([0, 0])
+  const [currentRoute, setCurrentRoute] = useState()
 
-  const { createUser, orderTransport } = useData();
+  const { orderTransport } = useData();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { handleSubmit, formState: { errors } } = useForm<FormData>();
+
+  useEffect(() => {
+
+    setRoutes(data);
+
+  }, [])
 
   async function loadPosition() {
      await Location.requestForegroundPermissionsAsync();
      const { status } = await Location.getForegroundPermissionsAsync();
-    console.log(status)
-
 
     if (status !== 'granted') {
       Alert.alert('Oooops...', 'Precesamos de sua permissão');
@@ -50,17 +105,11 @@ export function OrderTransport() {
     let location = await Location.getCurrentPositionAsync({});
     const { latitude, longitude } = location.coords;
 
-
      setInicialPosition([
         latitude,
         longitude
     ])
-
-    console.log(Number(inicialPosition[0]), inicialPosition[1])
-
 }
-
-const GOOGLE_MAPS_APIKEY = googleApiKey;
 
   useEffect(() => {
 
@@ -68,21 +117,18 @@ const GOOGLE_MAPS_APIKEY = googleApiKey;
 
   }, [])
 
-  function handleRoteSelected(id: string) {
-    console.log(id)
-    setRouteSelected(id)
-
+  function handleRoteSelected(item: object) {
+    setCurrentRoute(item)
+    setRouteSelected(item.id)
   }
 
-
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
 
     try {
-      const response = await createUser();
-      await AsyncStorage.setItem('@teoapp:userId', response[0].id)
-      console.log(response[0])
-      if (response[0].id) {
-        orderTransport(response[0].id)
+      const userSaved = await AsyncStorage.getItem('@teoapp:student');
+      const userId =  userSaved ? (JSON.parse(userSaved)) : {};
+      if (userId) {
+        orderTransport(userId[0].id, routeSelected)
       }
 
       navigation.navigate('Confirmation', {
@@ -92,67 +138,10 @@ const GOOGLE_MAPS_APIKEY = googleApiKey;
         nextScreen: 'Dashboard'
       })
     } catch (err) {
-      Alert.alert('ALgo deu errado')
+      Alert.alert('Algo deu errado')
     }
 
   };
-
-  const data = [
-    {
-      "id": "asdadqwdqwd",
-      "name": "Rota 1",
-      "shift": "Manha",
-      "path": [
-        {
-          "id": "asdasdasd",
-          "street": "Rua 1"
-        },
-        {
-          "id": "asdasdasqwe",
-          "street": "Rua 2"
-        }
-      ]
-    },
-    {
-      "id": "dasdasd",
-      "name": "Rota 2",
-      "shift": "Noite",
-      "path": [
-        {
-          "id": "asdasdasd",
-          "street": "Rua 1"
-        },
-        {
-          "id": "asdasdasqwe",
-          "street": "Rua 2"
-        }
-      ]
-    },
-    {
-      "id": "zxczxxc",
-      "name": "Rota 2",
-      "shift": "Noite",
-      "path": [
-        {
-          "id": "asdasdasd",
-          "street": "Rua 1"
-        },
-        {
-          "id": "asdasdasqwe",
-          "street": "Rua 2"
-        }
-      ]
-    }
-  ]
-
-  const coordinates = [
-    { latitude: -29.8928138, longitude: -50.2610572 },
-    { latitude: -29.8878367, longitude: -50.270051 },
-    { latitude: -29.8959559, longitude: -50.2725517 },
-  ]
-
-  const initial = { latitude: inicialPosition[0],
-    longitude: inicialPosition[1], latitudeDelta: 0.9, longitudeDelta: 0.9 }
 
   return (
     <View style={[styles.container, styles.androidSafeArea]}>
@@ -180,16 +169,23 @@ const GOOGLE_MAPS_APIKEY = googleApiKey;
           longitudeDelta: 0.050
           }}>
 
-          <Marker coordinate={coordinates[0]}/>
-          <Marker coordinate={coordinates[1]}/>
+            {routeSelected !== ''  ? (
 
-          <MapViewDirections
-            origin={coordinates[0]}
-            destination={coordinates[1]}
-            apikey={GOOGLE_MAPS_APIKEY}
-            strokeWidth={10}
-            strokeColor={colors.green}
-          />
+              <MapViewDirections
+                origin={{
+                  latitude: currentRoute.points[0].latitude,
+                  longitude: currentRoute.points[0].longitude
+                }}
+                destination={{
+                  latitude: currentRoute.points[currentRoute.points.length -1].latitude,
+                  longitude: currentRoute.points[currentRoute.points.length -1].longitude
+                }}
+                apikey={GOOGLE_MAPS_APIKEY}
+                strokeWidth={10}
+                strokeColor={colors.green}
+              />
+               ) : <></>}
+
         </MapView>
       )}
       </View>
@@ -197,15 +193,13 @@ const GOOGLE_MAPS_APIKEY = googleApiKey;
       <View style={[styles.body]}>
 
         <FlatList
-          data={data}
+          data={routes}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <RouteItem
               data={item}
               active={item.id === routeSelected}
-              // onPress={() => { handleRoteSelected(item.id) }}
-              onPress={() => { loadPosition() }}
-
+              onPress={() => { handleRoteSelected(item) }}
             />
           )}
           contentContainerStyle={styles.routeList}

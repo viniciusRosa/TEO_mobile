@@ -23,7 +23,8 @@ import { useEffect } from 'react';
 export function UserSchoolForm() {
 
   const {
-    getSchools
+    getSchools,
+    createUser
   } = useData();
 
   const navigation = useNavigation();
@@ -62,6 +63,8 @@ export function UserSchoolForm() {
 
       await userSchoolSave(data)
 
+      const response = await createUser();
+      await AsyncStorage.setItem('@teoapp:userId', response[0].id)
 
       navigation.navigate('Confirmation', {
         title: 'Dados escolares salvos',

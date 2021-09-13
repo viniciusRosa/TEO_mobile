@@ -18,11 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect } from 'react';
 import { checkEmail } from '../libs/storage'
 import { useContext } from 'react';
-import { DataContext } from '../contexts/DataContext';
+import { useData } from '../contexts/DataContext';
 
 export function UserIdentification() {
 
-  const {  } = useContext(DataContext);
 
   const [email, setEmail] = useState<string>('');
   const [isFocused, setIsFocused] = useState(false);

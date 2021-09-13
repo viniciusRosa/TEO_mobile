@@ -10,7 +10,7 @@ export function Begin() {
   const navigation = useNavigation();
 
   function handleButton() {
-    navigation.navigate('UserForm');
+    navigation.navigate('FirstAccessUserForm');
   }
 
   return (

@@ -10,6 +10,24 @@ export interface Ifile {
   uri: string;
 }
 
+export interface CreateUserDadasProps {
+  name: string;
+  rg: string;
+  cpf: string;
+  borndate: string;
+  password: string;
+  deficiencyInfo: string;
+  address: string;
+  number: string;
+  complement: string;
+  uf: string;
+  city: string
+  schoolId: string;
+  classe: string;
+  shift: string;
+  series: string;
+}
+
 export interface UserDadasProps {
   name: string;
   rg: string;
@@ -39,6 +57,7 @@ export interface IVacancyRequest {
   id: string;
   studentId: string;
   status: string;
+  route: string;
   createAt: string;
   updateAt: string;
 }

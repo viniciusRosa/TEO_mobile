@@ -21,50 +21,91 @@ import { Picker } from '@react-native-picker/picker';
 import unknownUser from '../assets/images/unknownUser.png'
 import { StyledInputText } from '../components/StyledInputText';
 import { StyledInput } from '../components/StyledInput';
-
-import { useData } from '../contexts/DataContext'
-
+import axios from 'axios';
+import { useData } from '../contexts/DataContext';
 
 import {
-  UserDadasProps,
-  userDataSave,
-  userImageSave,
+  CreateUserDadasProps,
   userImageLoad
 } from '../libs/storage'
+import { School } from '../types/School';
+import { ImageType } from '../types/Image';
 
-export function UserForm() {
+export function FirstAccessUserForm() {
+
+  const {
+    getSchools,
+    createStudent
+  } = useData();
 
   const activeValidation = false
   const navigation = useNavigation();
 
   const [pickedImagePath, setPicketImagePath] = useState('');
-  const [deficiencyInfo, setDeficiencyInfo] = useState('')
-  const [deficiency, setDeficiency] = useState(false)
+  const [deficiencyInfo, setDeficiencyInfo] = useState('');
+  const [deficiency, setDeficiency] = useState(false);
+  const [image, setImage] = useState<ImageType>(unknownUser);
 
-  const { createUser, orderTransport } = useData();
+  const [ufs, setUfs] = useState([]);
+  const [selectedUf, setSelectedUf] = useState('');
+  const [cities, setCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [empyFields, setEmpyFields] = useState(false);
 
+  const [selectedSchool, setSelectedSchool] = useState('');
+  const [selectedShift, setSelectedShift] = useState('');
+  const [selectedSeries, setSelectedSeries] = useState('');
+  const [schools, setSchools] = useState<School[]>([]);
+
+  useEffect(() => {
+    async function  loadSchools() {
+      const response = await getSchools();
+      setSchools(response);
+    }
+    loadSchools();
+  }, [])
 
   useEffect(() => {
     async function imageRecovery() {
-      const data = await userImageLoad();
-      setPicketImagePath(data.uri ? data.uri : '')
+      const {uri} = await userImageLoad();
+      setPicketImagePath(uri ? uri : '')
     }
     imageRecovery()
   }, [])
 
-  const { control, handleSubmit, formState: { errors } } = useForm<UserDadasProps>({});
+  useEffect(() => {
+    axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+      .then(response => {
+        const ufInitials = response.data.map(uf => uf.sigla);
+        setUfs(ufInitials);
+      })
+  }, []);
 
+  useEffect(() => {
+    axios.get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`)
+      .then(response => {
+        const cityNames = response.data.map(city => city.nome);
+        setCities(cityNames);
+      })
+  }, [selectedUf]);
 
-  const onSubmit = async (data: UserDadasProps) => {
+  const { control, handleSubmit, formState: { errors } } = useForm<CreateUserDadasProps>({});
 
-    data.deficiencyInfo = deficiencyInfo
+  const onSubmit = async (data: CreateUserDadasProps) => {
+
+    data.deficiencyInfo = deficiencyInfo;
+    data.uf = selectedUf;
+    data.city = selectedCity;
+    data.schoolId = selectedSchool;
+    data.shift = selectedShift;
+    data.series = selectedSeries;
 
       try{
-      const save = await userDataSave(data)
-      navigation.navigate('Confirmation', {
+        createStudent(data, image);
+        navigation.navigate('Confirmation', {
           title: 'Dados Salvos',
           icon: 'verified',
-          nextScreen: 'UserAdressForm',
+          nextScreen: 'OrderTransport',
         })
 
     } catch (err) {
@@ -94,9 +135,7 @@ export function UserForm() {
         type: 'image/jpg',
         name: 'studentPhoto.jpg'
       }
-      await userImageSave(photo)
-      await setPicketImagePath(photo.uri);
-
+      setImage(photo);
     }
   }
 
@@ -117,9 +156,9 @@ export function UserForm() {
 
             <TouchableOpacity style={styles.camera} onPress={openCamera}>
               {
-                pickedImagePath === ''
-                  ? <Image source={unknownUser} style={styles.thumbnail} />
-                  : <Image source={{ uri: pickedImagePath }} style={styles.thumbnail} />
+                image?.uri
+                ? <Image source={{ uri: image?.uri }} style={styles.thumbnail} />
+                : <Image source={unknownUser} style={styles.thumbnail} />
               }
 
             </TouchableOpacity>
@@ -214,17 +253,14 @@ export function UserForm() {
             </Picker>
           </View>
 
-
           {deficiency
             ? (
-
               <StyledInput
                 ask='Qual?'
                 placeholder=''
                 onChangeText={value => setDeficiencyInfo(value)}
                 value={deficiencyInfo}
               />
-
             )
             : (
               <View></View>
@@ -248,6 +284,176 @@ export function UserForm() {
           />
           {errors.password && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
 
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Endereço'
+                placeholder='Ex: Rua...'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='address'
+            rules={{ required: activeValidation }}
+          />
+          {errors.address && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Numero'
+                placeholder='Ex: 111'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+                keyboardType='numeric'
+              />
+            )}
+            name='number'
+            rules={{ required: activeValidation }}
+          />
+          {errors.number && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Complemento'
+                placeholder='Ex: ap 111 bloco A...'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='complement'
+            rules={{ required: false }}
+            defaultValue=''
+          />
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Estado</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedUf}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedUf(itemValue)
+              }>
+
+              <Picker.Item label="Selecione o Estado" value="" />
+              {
+                ufs.map(uf => {
+                  return (
+                    <Picker.Item key={uf} label={uf} value={uf} />
+                  )
+                })
+              }
+            </Picker>
+          </View>
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Cidade</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedCity}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedCity(itemValue)
+              }>
+              <Picker.Item label="Selecione o Estado" value="" />
+              {
+                cities.map(city => {
+                  return (
+                    <Picker.Item key={city} label={city} value={city} />
+                  )
+                })
+              }
+
+            </Picker>
+          </View>
+
+          {
+            empyFields ? <Text style={styles.errorText}>Estado e cidade são campos obrigatórios</Text> : <Text></Text>
+          }
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Escola em que estuda</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedSchool}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedSchool(itemValue)
+              }>
+              <Picker.Item label="Selecione a escola" value="escola" />
+
+              {
+                schools.map(school => {
+                  return (
+                    <Picker.Item key={school.id} label={school.name} value={school.id} />
+                  )
+                })
+              }
+            </Picker>
+          </View>
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Turno em que estuda</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedShift}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedShift(itemValue)
+              }>
+
+              <Picker.Item label="Selecione o turno" value="" />
+              <Picker.Item label="Manhã" value="manha" />
+              <Picker.Item label="Tarde" value="tarde" />
+              <Picker.Item label="Noite" value="noite" />
+
+            </Picker>
+          </View>
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Série</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedSeries}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedSeries(itemValue)
+              }>
+
+              <Picker.Item label="Selecione a série" value="" />
+              <Picker.Item label="1º ano" value="1a" />
+              <Picker.Item label="2º ano" value="2a" />
+              <Picker.Item label="3º ano" value="3a" />
+              <Picker.Item label="4º ano" value="4a" />
+              <Picker.Item label="5º ano" value="5a" />
+              <Picker.Item label="6º ano" value="6a" />
+
+            </Picker>
+          </View>
+
+          <Controller
+              control={control}
+              render={({ field: {onChange, onBlur, value} }) => (
+                <StyledInput
+                  ask='Turma'
+                  placeholder=''
+                  onBlur={onBlur}
+                  onChangeText={value => onChange(value)}
+                  value={value}
+                  />
+              )}
+              name='classe'
+              rules={{required: false}}
+              defaultValue= ''
+            />
+
+            {
+              empyFields  ? <Text style={styles.errorText}>Escola e turno são campos obrigatórios</Text> : <Text></Text>
+            }
+
 
           <View style={styles.submitButton}>
             <Button
@@ -255,7 +461,6 @@ export function UserForm() {
               title='Salvar'
               onPress={handleSubmit(onSubmit)}
             />
-
           </View>
 
 

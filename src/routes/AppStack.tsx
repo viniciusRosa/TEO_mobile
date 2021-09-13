@@ -13,6 +13,7 @@ import { UserSchoolForm } from '../pages/UserSchoolForm';
 import { Login } from '../pages/Login';
 import AuthTab from './AuthTap';
 import { UserEditForm } from '../pages/UserEditForm';
+import { FirstAccessUserForm } from '../pages/FirstAccessUserForm';
 
 const { Navigator, Screen } = createStackNavigator();
 
@@ -49,8 +50,8 @@ const AppStack: React.FC = () => {
       />
 
       <Screen
-        name='UserForm'
-        component={UserForm}
+        name='FirstAccessUserForm'
+        component={FirstAccessUserForm}
       />
 
       <Screen
@@ -82,6 +83,7 @@ const AppStack: React.FC = () => {
         name='UserEditForm'
         component={UserEditForm}
       />
+
 
       </Navigator>
 

@@ -1,37 +1,36 @@
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import api from '../services/api';
 import { getData, userImageLoad, saveVacancy, loadVacancy } from '../libs/storage';
+import { School } from '../types/School';
+import { Student } from '../types/Student';
+import { ImageType } from '../types/Image';
+import { AsyncStorage } from 'react-native';
+
 
 interface DataContextProps {
-  getSchools: () => [any];
+  getSchools: () => School[];
   getSchool: () => Object;
-  createUser: () => void;
+  createStudent: (student: Student) => void;
   getVacancyRequest: () => Object;
-  orderTransport: (id: string) => string;
+  orderTransport: (id: string, routeSelected: string) => string;
   loadMessages: (vacancyrequest: string) => [any]
   sendMessage: (vacancyrequest: string, from: string, message: string) => void;
   updateVacancyRequest: () => object
 
 }
 
+export const DataContext = createContext<DataContextProps>({} as DataContextProps);
 
-interface DataProviderProps {
-  children: ReactNode
+export const DataProvider: React.FC = ({children, ...rest}) => {
 
-}
-
-export const DataContext = createContext({} as DataContextProps);
-
-export function DataProvider({children, ...rest}: DataProviderProps) {
 
   async function checkEmail(email: string) {
 
   }
 
   async function getSchools() {
-    const schools = await api.get('/schools');
-    console.log(schools.data)
-    return schools.data;
+    const { data } = await api.get('/schools');
+    return data;
   }
 
   async function getSchool(id: string) {
@@ -53,45 +52,46 @@ export function DataProvider({children, ...rest}: DataProviderProps) {
     return saved;
   }
 
-  async function createUser() {
-    const userdata = await getData();
-    const image = await userImageLoad();
+  async function createStudent(data: Student, image: ImageType) {
+    // const image = await userImageLoad();
+    const email = await AsyncStorage.getItem('@teoapp:userEmail')
 
     const user = new FormData();
     user.append('image', image)
-    user.append('name', userdata.name)
-    user.append('email', userdata.email)
-    user.append('rg', userdata.rg)
-    user.append('cpf', userdata.cpf)
-    user.append('borndate', userdata.borndate)
-    user.append('password', userdata.password)
-    user.append('deficiencyInfo', userdata.deficiencyInfo)
-    user.append('adress', userdata.adress)
-    user.append('number', userdata.number)
-    user.append('complement', userdata.complement)
-    user.append('uf', userdata.uf)
-    user.append('city', userdata.city)
-    user.append('schoolId', userdata.schoolId)
-    user.append('shift', userdata.shift)
-    user.append('series', userdata.series)
-    user.append('classe', userdata.classe)
+    user.append('name', data.name)
+    user.append('email', email || '')
+    user.append('rg', data.rg)
+    user.append('cpf', data.cpf)
+    user.append('borndate', data.borndate)
+    user.append('password', data.password)
+    user.append('deficiencyInfo', data.deficiencyInfo)
+    user.append('address', data.address)
+    user.append('number', data.number)
+    user.append('complement', data.complement)
+    user.append('uf', data.uf)
+    user.append('city', data.city)
+    user.append('schoolId', data.schoolId)
+    user.append('shift', data.shift)
+    user.append('series', data.series)
+    user.append('classe', data.classe)
 
-
-
-    const response = await api.post('/students', user)
-    return response.data;
+    const response = await api.post('/students', user);
+    await AsyncStorage.setItem('@teoapp:student', JSON.stringify(response.data))
+    const userSaved = await AsyncStorage.getItem('@teoapp:student');
+    return userSaved ? (JSON.parse(userSaved)) : {};
   }
 
-  async function orderTransport(id: string) {
+  async function orderTransport(id: string, routeSelected: string) {
     try{
       const { data }  = await api.post('vacancyrequest', {
         studentid: id,
-        status: 'in_progress'
+        status: 'in_progress',
+        route: routeSelected
       })
 
       await saveVacancy(data[0]);
+      return data;
 
-      return data
     } catch(err) {
 
       throw new Error(err)
@@ -118,7 +118,7 @@ export function DataProvider({children, ...rest}: DataProviderProps) {
       value={{
         getSchools,
         getSchool,
-        createUser,
+        createStudent,
         getVacancyRequest,
         orderTransport,
         loadMessages,

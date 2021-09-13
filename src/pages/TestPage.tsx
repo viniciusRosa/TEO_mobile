@@ -44,6 +44,16 @@ export function TestPage() {
             <Text style={styles.menuText}>OrderTransport</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity style={styles.menuItem} onPress={() => {navigation.navigate('UserSchoolForm')}}>
+            <FontAwesome5 name="bug" size={24} color={colors.gray} />
+            <Text style={styles.menuText}>UserSchoolForm</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => {navigation.navigate('FirstAccessUserForm')}}>
+            <FontAwesome5 name="bug" size={24} color={colors.gray} />
+            <Text style={styles.menuText}>FirstAccessUserForm</Text>
+          </TouchableOpacity>
+
         </View>
 
       </ScrollView>
