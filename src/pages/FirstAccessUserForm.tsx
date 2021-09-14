@@ -101,7 +101,7 @@ export function FirstAccessUserForm() {
     data.series = selectedSeries;
 
       try{
-        createStudent(data, image);
+        const user = createStudent(data, image);
         navigation.navigate('Confirmation', {
           title: 'Dados Salvos',
           icon: 'verified',
