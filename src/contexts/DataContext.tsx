@@ -13,9 +13,10 @@ interface DataContextProps {
   createStudent: (student: Student) => void;
   getVacancyRequest: () => Object;
   orderTransport: (id: string, routeSelected: string) => string;
-  loadMessages: (vacancyrequest: string) => [any]
+  loadMessages: (vacancyrequest: string) => [any];
   sendMessage: (vacancyrequest: string, from: string, message: string) => void;
-  updateVacancyRequest: () => object
+  updateVacancyRequest: () => object;
+  loadRoutes: () => [];
 
 }
 
@@ -85,8 +86,8 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
     try{
       const { data }  = await api.post('vacancyrequest', {
         studentid: id,
-        status: 'in_progress',
-        route: routeSelected
+        route: routeSelected,
+        status: 'in_progress'
       })
 
       await saveVacancy(data[0]);
@@ -113,9 +114,15 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
     })
   }
 
+  async function loadRoutes() {
+    const response = await api.get('routes');
+    return response.data;
+  }
+
   return (
     <DataContext.Provider
       value={{
+        loadRoutes,
         getSchools,
         getSchool,
         createStudent,

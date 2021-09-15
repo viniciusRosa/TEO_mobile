@@ -83,11 +83,17 @@ export function OrderTransport() {
   const [inicialPosition, setInicialPosition] = useState <[number, number]> ([0, 0])
   const [currentRoute, setCurrentRoute] = useState()
 
-  const { orderTransport } = useData();
+  const { orderTransport, loadRoutes } = useData();
 
   const { handleSubmit, formState: { errors } } = useForm<FormData>();
 
   useEffect(() => {
+    // async function getRoutes() {
+    //   const response = await loadRoutes();
+    //   console.log(response)
+    //   setRoutes(response);
+    // }
+    // getRoutes();
 
     setRoutes(data);
 
