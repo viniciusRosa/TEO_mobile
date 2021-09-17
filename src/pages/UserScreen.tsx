@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/core';
 import unknownUser from '../assets/images/unknownUser.png'
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userImageLoad, getData } from '../libs/storage';
 
 
 export function UserScreen() {
@@ -24,13 +25,16 @@ export function UserScreen() {
   const [name, setsName] = useState('');
 
   useEffect(() => {
-    async function getData() {
-      const image = await AsyncStorage.getItem('@teoapp:userimage')
-      const name = await AsyncStorage.getItem('@teoapp:username')
-      setPicketImagePath(image || '')
-      setsName(name || '')
+    async function initializeData() {
+
+      const data = await getData();
+
+      const image = await userImageLoad();
+
+      setPicketImagePath(image.uri || '')
+      setsName(data[0].name || '')
     }
-    getData()
+    initializeData()
   }, [])
 
   function handleUserEdit() {
@@ -62,7 +66,9 @@ export function UserScreen() {
 
         <View style={styles.ImageView}>
 
-          <Image source={ pickedImagePath != '' ? { uri: String(pickedImagePath) } : unknownUser} style={styles.thumbnail} />
+          <Image source={ pickedImagePath != ''
+          ? { uri: String(pickedImagePath) }
+          : unknownUser} style={styles.thumbnail} />
 
           <Text style={styles.bodyTextTitle}> {name} </Text>
         </View>
