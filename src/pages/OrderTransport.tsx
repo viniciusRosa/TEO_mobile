@@ -20,60 +20,6 @@ import * as Location from 'expo-location'
 import MapViewDirections from 'react-native-maps-directions';
 import { googleApiKey } from '../../keys';
 
-interface FormData {
-  order: string;
-}
-
-const data = [
-  {
-    "id": "asdadqwdqwd",
-    "name": "Rota 1",
-    "shift": "Manha",
-    "schedule": {
-      "start": "07:00",
-      "final": "07:45"
-    },
-    "points": [
-      {
-        "id": "asdasdasd",
-        "adress": "Rua 1",
-        "latitude": -29.8928138,
-        "longitude": -50.2610572
-      },
-      {
-        "id": "asdasdasd2",
-        "adress": "Rua 2",
-        "latitude": -29.8878367,
-        "longitude": -50.270051
-      }
-    ]
-  },
-
-  {
-    "id": "asdadqwdqwdqwe",
-    "name": "Rota 1",
-    "shift": "Manha",
-    "schedule": {
-      "start": "07:00",
-      "final": "07:45"
-    },
-    "points": [
-      {
-        "id": "asdasdasd123",
-        "adress": "Rua 1",
-        "latitude": -29.8928138,
-        "longitude": -50.2610572
-      },
-      {
-        "id": "asdasdasd2qwe",
-        "adress": "Rua 2",
-        "latitude": -29.8878367,
-        "longitude": -50.270051
-      }
-    ]
-  },
-]
-
 export function OrderTransport() {
   const navigation = useNavigation();
   const GOOGLE_MAPS_APIKEY = googleApiKey;
@@ -88,14 +34,12 @@ export function OrderTransport() {
   const { handleSubmit, formState: { errors } } = useForm<FormData>();
 
   useEffect(() => {
-    // async function getRoutes() {
-    //   const response = await loadRoutes();
-    //   console.log(response)
-    //   setRoutes(response);
-    // }
-    // getRoutes();
-
-    setRoutes(data);
+    async function getRoutes() {
+      const response = await loadRoutes();
+      setRoutes(response);
+    }
+    getRoutes();
+    setCurrentRoute(routes[0])
 
   }, [])
 
@@ -173,7 +117,8 @@ export function OrderTransport() {
           longitude: Number(inicialPosition[1]),
           latitudeDelta: 0.050,
           longitudeDelta: 0.050
-          }}>
+          }}
+          >
 
             {routeSelected !== ''  ? (
 

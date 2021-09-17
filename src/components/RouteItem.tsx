@@ -57,9 +57,9 @@ export function RouteItem({
             <View style={{flexDirection: 'row', marginTop: 5}}>
               <Text style={styles.title}>Horário: </Text>
               <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{marginRight: 8}}>{data.schedule.start}</Text>
+                <Text style={{marginRight: 8}}></Text>
                 <FontAwesome5 style={{marginRight: 8}} name="arrows-alt-h" size={24} color={colors.gray_medium} />
-                <Text style={{marginRight: 8}}>{data.schedule.final}</Text>
+                <Text style={{marginRight: 8}}></Text>
               </View>
             </View>
 
