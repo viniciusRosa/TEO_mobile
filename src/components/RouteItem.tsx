@@ -7,7 +7,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 interface PathItem {
   id: string;
-  adress: string;
+  address: string;
   latitude: number,
   longitude: number
 }
@@ -17,7 +17,8 @@ interface RouteItemProps extends RectButtonProps {
     id: string;
     name: string;
     shift: string;
-    schedule: {start: string, final: string}
+    timeDeparture: string;
+    timeArrival: string
     points: PathItem[];
   }
   active?: boolean;
@@ -57,9 +58,9 @@ export function RouteItem({
             <View style={{flexDirection: 'row', marginTop: 5}}>
               <Text style={styles.title}>Horário: </Text>
               <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{marginRight: 8}}></Text>
+                <Text style={{marginRight: 8}}>{data.timeDeparture}</Text>
                 <FontAwesome5 style={{marginRight: 8}} name="arrows-alt-h" size={24} color={colors.gray_medium} />
-                <Text style={{marginRight: 8}}></Text>
+                <Text style={{marginRight: 8}}>{data.timeArrival}</Text>
               </View>
             </View>
 
@@ -67,7 +68,7 @@ export function RouteItem({
               <Text style={styles.title}>Rota: </Text>
               {data.points.map(point => (
                 <Text key={point.id}>
-                  {point.adress}{", "}
+                  {point.address}{", "}
                 </Text>
               ))}
             </View>

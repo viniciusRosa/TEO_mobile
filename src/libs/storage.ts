@@ -235,26 +235,10 @@ export async function userSchoolSave(userSchool: UserSchoolDataProps) {
 }
 
 export async function getData() {
-    const user =  {
-      name: await AsyncStorage.getItem('@teoapp:username'),
-      email: await AsyncStorage.getItem('@teoapp:userEmail'),
-      rg: await AsyncStorage.getItem('@teoapp:userrg'),
-      cpf: await AsyncStorage.getItem('@teoapp:usercpf'),
-      borndate: await AsyncStorage.getItem('@teoapp:userbornadte'),
-      password: await AsyncStorage.getItem('@teoapp:userpassword'),
-      deficiencyInfo: await AsyncStorage.getItem('@teoapp:userdeficiencyInfo'),
-      adress: await AsyncStorage.getItem('@teoapp:useradress'),
-      number: await AsyncStorage.getItem('@teoapp:usernumber'),
-      complement: await AsyncStorage.getItem('@teoapp:usercomplement'),
-      uf: await AsyncStorage.getItem('@teoapp:useruf'),
-      city: await AsyncStorage.getItem('@teoapp:usercity'),
-      schoolId: await AsyncStorage.getItem('@teoapp:userschool'),
-      shift: await AsyncStorage.getItem('@teoapp:usershift'),
-      series: await AsyncStorage.getItem('@teoapp:userseries'),
-      classe: await AsyncStorage.getItem('@teoapp:userclass'),
-    }
 
-    return user
+  const userSaved = await AsyncStorage.getItem('@teoapp:student');
+  return userSaved ? (JSON.parse(userSaved)) : {};
+
 }
 
 export async function getUser() {

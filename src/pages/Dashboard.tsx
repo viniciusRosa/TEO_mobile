@@ -43,18 +43,19 @@ export function Dashboard() {
   useEffect(() => {
     async function initializeData() {
 
-      const student = await getData();
+      const data = await getData()
+      console.log(data)
+
       const image = await userImageLoad();
-      const school = await getSchool(student.schoolId);
-      await saveSchool(school);
+      const school = await getSchool(data[0].school_id);
 
 
       setPicketImagePath(image.uri || '')
-      setsName(student.name || '')
+      setsName(data[0].name || '')
       setSchool(school.name || '')
-      setShift(student.shift || '')
-      setserie(student.series || '')
-      setuserclass(student.classe || '')
+      setShift(data[0].shift || '')
+      setserie(data[0].series || '')
+      setuserclass(data[0].classe || '')
     }
     initializeData()
   }, [])

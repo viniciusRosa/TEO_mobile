@@ -26,7 +26,8 @@ import { useData } from '../contexts/DataContext';
 
 import {
   CreateUserDadasProps,
-  userImageLoad
+  userImageLoad,
+  userImageSave
 } from '../libs/storage'
 import { School } from '../types/School';
 import { ImageType } from '../types/Image';
@@ -136,6 +137,7 @@ export function FirstAccessUserForm() {
         name: 'studentPhoto.jpg'
       }
       setImage(photo);
+      await userImageSave(photo)
     }
   }
 
