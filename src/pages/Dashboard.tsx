@@ -48,6 +48,7 @@ export function Dashboard() {
 
       const image = await userImageLoad();
       const school = await getSchool(data[0].school_id);
+      await saveSchool(school)
 
 
       setPicketImagePath(image.uri || '')
