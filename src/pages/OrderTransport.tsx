@@ -120,6 +120,12 @@ export function OrderTransport() {
           }}
           >
 
+            <Marker
+              coordinate={{latitude: -29.890794, longitude: -50.256579}}
+              title={"Minha casa"}
+              description={''}
+            />
+
             {routeSelected !== ''  ? (
 
               <MapViewDirections
@@ -127,6 +133,7 @@ export function OrderTransport() {
                   latitude: currentRoute.points[0].latitude,
                   longitude: currentRoute.points[0].longitude
                 }}
+                waypoints={[{latitude: -29.890794, longitude: -50.256579}]}
                 destination={{
                   latitude: currentRoute.points[currentRoute.points.length -1].latitude,
                   longitude: currentRoute.points[currentRoute.points.length -1].longitude

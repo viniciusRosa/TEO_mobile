@@ -8,6 +8,7 @@ import { AsyncStorage } from 'react-native';
 
 
 interface DataContextProps {
+  checkEmailDb: (email: string) => {}
   getSchools: () => School[];
   getSchool: () => Object;
   createStudent: (student: Student) => void;
@@ -25,8 +26,10 @@ export const DataContext = createContext<DataContextProps>({} as DataContextProp
 export const DataProvider: React.FC = ({children, ...rest}) => {
 
 
-  async function checkEmail(email: string) {
-
+  async function checkEmailDb(email: string) {
+    const { data } = await api.get(`/emailcheck/${email}`)
+    console.log(data);
+    return data;
   }
 
   async function getSchools() {
@@ -122,6 +125,7 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
   return (
     <DataContext.Provider
       value={{
+        checkEmailDb,
         loadRoutes,
         getSchools,
         getSchool,

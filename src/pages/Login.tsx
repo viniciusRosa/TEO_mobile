@@ -14,14 +14,11 @@ import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/core';
 import { useForm, Controller } from 'react-hook-form';
 
-import { StyledInputText } from '../components/StyledInputText';
 import { StyledInput } from '../components/StyledInput';
-
 
 interface FormData {
   email: string;
   password: string;
-
 }
 
 export function Login() {

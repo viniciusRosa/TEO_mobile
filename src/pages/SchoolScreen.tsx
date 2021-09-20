@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   Platform,
   ScrollView,
   TouchableOpacity,
@@ -11,10 +10,9 @@ import {
 } from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
-import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons/'
+import { FontAwesome5 } from '@expo/vector-icons/'
 import { useNavigation } from '@react-navigation/core';
 import { useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { loadSchool } from '../libs/storage';
 

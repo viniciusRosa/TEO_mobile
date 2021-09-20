@@ -16,12 +16,13 @@ import { BottonButton } from '../components/BottonButton';
 import { useNavigation } from '@react-navigation/core';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect } from 'react';
-import { checkEmail } from '../libs/storage'
-import { useContext } from 'react';
 import { useData } from '../contexts/DataContext';
 
 export function UserIdentification() {
 
+  const {
+    checkEmailDb
+  } = useData();
 
   const [email, setEmail] = useState<string>('');
   const [isFocused, setIsFocused] = useState(false);
@@ -29,16 +30,12 @@ export function UserIdentification() {
 
   const navigation = useNavigation();
 
-
-  // DATA
-
   useEffect(() => {
     async function data() {
       const emailSaved = await AsyncStorage.getItem('@teoapp:userEmail');
       console.log(emailSaved)
       setEmail(emailSaved || '')
     }
-
     data()
   }, [])
 
@@ -55,18 +52,22 @@ export function UserIdentification() {
     }
 
     try {
-      await checkEmail(email)
-      navigation.navigate('Begin')
+      const { message } = await checkEmailDb(email);
+      console.log(message);
+
+      if (!message) {
+        navigation.navigate('Begin')
+      } else {
+        return Alert.alert('Este email já está cadastrado!');
+      }
+
     } catch (err) {
       Alert.alert('Algo deu errado.')
       console.log(err)
     }
-
-
   }
 
   function handleLogin() {
-
     navigation.navigate('Login')
   }
 
@@ -83,7 +84,6 @@ export function UserIdentification() {
     setIsFilled(!!value)
     setEmail(value);
   }
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -164,19 +164,6 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 10,
     textAlign: 'left'
-  },
-
-  body: {
-    marginHorizontal: 40,
-    marginTop: 20,
-    marginBottom: 88,
-  },
-
-  textBody: {
-    textAlign: 'center',
-    fontSize: 18,
-    fontFamily: fonts.text_medium,
-    color: colors.gray
   },
 
   footer: {
