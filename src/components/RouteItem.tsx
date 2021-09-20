@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler'
 import colors from '../styles/colors';
@@ -7,6 +7,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 interface PathItem {
   id: string;
+  name: string;
   address: string;
   latitude: number,
   longitude: number
@@ -17,8 +18,8 @@ interface RouteItemProps extends RectButtonProps {
     id: string;
     name: string;
     shift: string;
-    timeDeparture: string;
-    timeArrival: string
+    timeDeparture?: string;
+    timeArrival?: string;
     points: PathItem[];
   }
   active?: boolean;
@@ -29,16 +30,33 @@ export function RouteItem({
   active = false,
   ...rest
 }: RouteItemProps) {
+
+  const [streetName, setStreetName] = useState('');
+
+  useEffect(() => {
+
+    function concatAddress() {
+      let addresses = '';
+      data.points.map(point => {
+        addresses += point.address + ', ';
+      })
+      setStreetName(addresses);
+    }
+    concatAddress();
+  }, [])
+
+
+
   return (
     <RectButton style={[
       styles.container,
       active && styles.containerActive
-      ]} {...rest} >
+    ]} {...rest} >
 
       <View style={[
         styles.content,
         active && styles.contentActive
-        ]}>
+      ]}>
         <View style={styles.columnContent}>
           <View style={styles.columnleft}>
             <FontAwesome5 name="bus" size={48} color={colors.gray_medium} />
@@ -48,29 +66,27 @@ export function RouteItem({
           </View>
 
           <View style={styles.columnRight}>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: 'row' }}>
               <Text style={styles.title}>Turno: </Text>
               <Text>
                 {data.shift}
               </Text>
 
             </View>
-            <View style={{flexDirection: 'row', marginTop: 5}}>
+            <View style={{ flexDirection: 'row', marginTop: 5 }}>
               <Text style={styles.title}>Horário: </Text>
-              <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{marginRight: 8}}>{data.timeDeparture}</Text>
-                <FontAwesome5 style={{marginRight: 8}} name="arrows-alt-h" size={24} color={colors.gray_medium} />
-                <Text style={{marginRight: 8}}>{data.timeArrival}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ marginRight: 8 }}>{data.timeDeparture}</Text>
+                <FontAwesome5 style={{ marginRight: 8 }} name="arrows-alt-h" size={24} color={colors.gray_medium} />
+                <Text style={{ marginRight: 8 }}>{data.timeArrival}</Text>
               </View>
             </View>
 
-            <View style={{flexDirection: 'row'}}>
+            <View>
               <Text style={styles.title}>Rota: </Text>
-              {data.points.map(point => (
-                <Text key={point.id}>
-                  {point.address}{", "}
-                </Text>
-              ))}
+              <View style={{}}>
+                <Text>{streetName}</Text>
+              </View>
             </View>
 
           </View>
@@ -78,8 +94,14 @@ export function RouteItem({
       </View>
 
     </RectButton>
-    )
+  )
 }
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -125,8 +147,7 @@ const styles = StyleSheet.create({
   },
 
   columnRight: {
-    width: '65%',
-    justifyContent: 'center',
+    width: '65%'
   },
 
   title: {

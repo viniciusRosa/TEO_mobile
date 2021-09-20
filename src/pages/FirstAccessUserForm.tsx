@@ -18,12 +18,10 @@ import { useNavigation } from '@react-navigation/core';
 import { useForm, Controller } from 'react-hook-form';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
-import unknownUser from '../assets/images/unknownUser.png'
+import unknownUser from '../assets/images/unknownUser.png';
 import { StyledInputText } from '../components/StyledInputText';
 import { StyledInput } from '../components/StyledInput';
-import axios from 'axios';
 import { useData } from '../contexts/DataContext';
-
 import {
   CreateUserDadasProps,
   userImageLoad,
@@ -47,9 +45,11 @@ export function FirstAccessUserForm() {
   const [deficiency, setDeficiency] = useState(false);
   const [image, setImage] = useState<ImageType>(unknownUser);
 
-  const [ufs, setUfs] = useState([]);
-  const [selectedUf, setSelectedUf] = useState('');
-  const [cities, setCities] = useState([]);
+  const [ufs, setUfs] = useState(['RS']);
+  const [selectedUf, setSelectedUf] = useState('RS');
+  const [cities, setCities] = useState(['Arroio do Sal', 'Balneário Pinhal', 'Capão da Canoa',
+        'Caraá', 'Cidreira', 'Imbé', 'Maquiné', 'Osório', 'Palmares do Sul', 'Pinhal', 'Santo Antônio da Patrulha',
+        'Tramandaí', 'Xangri-lá']);
   const [selectedCity, setSelectedCity] = useState('');
   const [empyFields, setEmpyFields] = useState(false);
 
@@ -73,22 +73,6 @@ export function FirstAccessUserForm() {
     }
     imageRecovery()
   }, [])
-
-  useEffect(() => {
-    axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
-      .then(response => {
-        const ufInitials = response.data.map(uf => uf.sigla);
-        setUfs(ufInitials);
-      })
-  }, []);
-
-  useEffect(() => {
-    axios.get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`)
-      .then(response => {
-        const cityNames = response.data.map(city => city.nome);
-        setCities(cityNames);
-      })
-  }, [selectedUf]);
 
   const { control, handleSubmit, formState: { errors } } = useForm<CreateUserDadasProps>({});
 
@@ -426,12 +410,19 @@ export function FirstAccessUserForm() {
               }>
 
               <Picker.Item label="Selecione a série" value="" />
-              <Picker.Item label="1º ano" value="1a" />
-              <Picker.Item label="2º ano" value="2a" />
-              <Picker.Item label="3º ano" value="3a" />
-              <Picker.Item label="4º ano" value="4a" />
-              <Picker.Item label="5º ano" value="5a" />
-              <Picker.Item label="6º ano" value="6a" />
+              <Picker.Item label="1º ano do ensino fundamental" value="1a" />
+              <Picker.Item label="2º ano do ensino fundamental" value="2a" />
+              <Picker.Item label="3º ano do ensino fundamental" value="3a" />
+              <Picker.Item label="4º ano do ensino fundamental" value="4a" />
+              <Picker.Item label="5º ano do ensino fundamental" value="5a" />
+              <Picker.Item label="6º ano do ensino fundamental" value="6a" />
+              <Picker.Item label="7º ano do ensino fundamental" value="7a" />
+              <Picker.Item label="8º ano do ensino fundamental" value="8a" />
+              <Picker.Item label="9º ano do ensino fundamental" value="9a" />
+              <Picker.Item  label="Ensino médio" color={colors.gray} />
+              <Picker.Item label="1º ano do ensino médio" value="1aM" />
+              <Picker.Item label="2º ano do ensino médio" value="2aM" />
+              <Picker.Item label="3º ano do ensino médio" value="3aM" />
 
             </Picker>
           </View>

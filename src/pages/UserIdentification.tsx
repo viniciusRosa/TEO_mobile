@@ -33,7 +33,6 @@ export function UserIdentification() {
   useEffect(() => {
     async function data() {
       const emailSaved = await AsyncStorage.getItem('@teoapp:userEmail');
-      console.log(emailSaved)
       setEmail(emailSaved || '')
     }
     data()
@@ -53,7 +52,6 @@ export function UserIdentification() {
 
     try {
       const { message } = await checkEmailDb(email);
-      console.log(message);
 
       if (!message) {
         navigation.navigate('Begin')

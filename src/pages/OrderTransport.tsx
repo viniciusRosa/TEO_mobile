@@ -12,73 +12,77 @@ import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/core';
 import { useForm } from 'react-hook-form';
 import { Alert } from 'react-native';
-import { useData } from '../contexts/DataContext'
+import { useData } from '../contexts/DataContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteItem } from '../components/RouteItem';
 import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location'
+import * as Location from 'expo-location';
 import MapViewDirections from 'react-native-maps-directions';
 import { googleApiKey } from '../../keys';
+import { Student } from '../types/Student';
+import { Route, Point } from '../types/Route';
+
+type WayPoint = {
+  latitude: number;
+  longitude: number;
+}
 
 export function OrderTransport() {
   const navigation = useNavigation();
   const GOOGLE_MAPS_APIKEY = googleApiKey;
 
-  const [routes, setRoutes] = useState([])
-  const [routeSelected, setRouteSelected] = useState('')
-  const [inicialPosition, setInicialPosition] = useState <[number, number]> ([0, 0])
-  const [currentRoute, setCurrentRoute] = useState()
+  const [student, setStudent] = useState<Student>();
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [routeSelected, setRouteSelected] = useState<Route>();
+  const [waypoint, setWaypoint] = useState<WayPoint[]>([]);
 
   const { orderTransport, loadRoutes } = useData();
 
   const { handleSubmit, formState: { errors } } = useForm<FormData>();
 
   useEffect(() => {
+
     async function getRoutes() {
       const response = await loadRoutes();
       setRoutes(response);
+    };
+
+    async function getStudent() {
+      const studentSaved = await AsyncStorage.getItem('@teoapp:student');
+      const studentParse =  studentSaved ? (JSON.parse(studentSaved)) : {};
+
+      setStudent(studentParse[0])
     }
+
     getRoutes();
-    setCurrentRoute(routes[0])
+    getStudent();
 
   }, [])
-
-  async function loadPosition() {
-     await Location.requestForegroundPermissionsAsync();
-     const { status } = await Location.getForegroundPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert('Oooops...', 'Precesamos de sua permissão');
-      return;
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
-
-     setInicialPosition([
-        latitude,
-        longitude
-    ])
-}
 
   useEffect(() => {
+    if (routeSelected) {
+      if(routeSelected.points.length > 2) {
+        const filteredPoints = routeSelected.points.slice(1, routeSelected.points.length -1);
+        let wapPointsFormated: WayPoint[] = [];
 
-    loadPosition();
+        filteredPoints.map( point => {
+          wapPointsFormated.push({latitude: Number(point.latitude), longitude: Number(point.longitude)})
+        } )
 
-  }, [])
+        setWaypoint(wapPointsFormated)
+      }
+    }
+  }, [routeSelected])
 
-  function handleRoteSelected(item: object) {
-    setCurrentRoute(item)
-    setRouteSelected(item.id)
+  function handleRoteSelected(item: Route) {
+    setRouteSelected(item)
   }
 
   const onSubmit = async () => {
 
     try {
-      const userSaved = await AsyncStorage.getItem('@teoapp:student');
-      const userId =  userSaved ? (JSON.parse(userSaved)) : {};
-      if (userId) {
-        orderTransport(userId[0].id, routeSelected)
+      if (student && routeSelected) {
+        orderTransport(student.id, routeSelected.id)
       }
 
       navigation.navigate('Confirmation', {
@@ -109,40 +113,58 @@ export function OrderTransport() {
       </View>
 
       <View style={styles.mapContainer}>
-      { inicialPosition[0] !== 0 && (
+      {student?.latitude && (
         <MapView style={styles.map}
-        loadingEnabled={inicialPosition[0] === 0}
         initialRegion={{
-          latitude: Number(inicialPosition[0]),
-          longitude: Number(inicialPosition[1]),
+          latitude: Number(student?.latitude),
+          longitude: Number(student?.longitude),
           latitudeDelta: 0.050,
           longitudeDelta: 0.050
           }}
           >
 
             <Marker
-              coordinate={{latitude: -29.890794, longitude: -50.256579}}
+              coordinate={{latitude: Number(student?.latitude), longitude: Number(student?.longitude)}}
               title={"Minha casa"}
               description={''}
             />
 
-            {routeSelected !== ''  ? (
+            {routeSelected ? (
+              <>
 
               <MapViewDirections
                 origin={{
-                  latitude: currentRoute.points[0].latitude,
-                  longitude: currentRoute.points[0].longitude
+                  latitude: Number(routeSelected.points[0].latitude),
+                  longitude: Number(routeSelected.points[0].longitude)
                 }}
-                waypoints={[{latitude: -29.890794, longitude: -50.256579}]}
+                waypoints={waypoint}
                 destination={{
-                  latitude: currentRoute.points[currentRoute.points.length -1].latitude,
-                  longitude: currentRoute.points[currentRoute.points.length -1].longitude
+                  latitude: Number(routeSelected.points[routeSelected.points.length -1].latitude),
+                  longitude: Number(routeSelected.points[routeSelected.points.length -1].longitude)
                 }}
                 apikey={GOOGLE_MAPS_APIKEY}
-                strokeWidth={10}
+                strokeWidth={6}
                 strokeColor={colors.green}
               />
+
+              <Marker
+                coordinate={{latitude: Number(routeSelected.points[0].latitude), longitude: Number(routeSelected.points[0].longitude)}}
+                title={"Início"}
+                pinColor={colors.green}
+                description={''}
+              />
+
+              <Marker
+                coordinate={{latitude: Number(routeSelected.points[routeSelected.points.length -1].latitude),
+                            longitude: Number(routeSelected.points[routeSelected.points.length -1].longitude)}}
+                title={"Final"}
+                pinColor={colors.green}
+                description={''}
+              />
+              </>
+
                ) : <></>}
+
 
         </MapView>
       )}
@@ -156,7 +178,7 @@ export function OrderTransport() {
           renderItem={({ item }) => (
             <RouteItem
               data={item}
-              active={item.id === routeSelected}
+              active={item === routeSelected}
               onPress={() => { handleRoteSelected(item) }}
             />
           )}
@@ -206,6 +228,7 @@ const styles = StyleSheet.create({
 
   body: {
     flex: 1,
+    marginBottom:36
   },
 
   wrapper: {
@@ -228,7 +251,7 @@ const styles = StyleSheet.create({
 
   routeList: {
     justifyContent: 'center',
-    margin: 10,
+    marginHorizontal: 10,
   },
 
   // map view
