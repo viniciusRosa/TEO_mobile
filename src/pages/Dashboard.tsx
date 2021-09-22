@@ -12,13 +12,10 @@ import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/core';
 import { useEffect } from 'react';
 import unknownUser from '../assets/images/unknownUser.png'
-
 import { getData, userImageLoad, loadVacancy, saveSchool } from '../libs/storage';
 import { useData } from '../contexts/DataContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons/'
-
-
+import { FontAwesome5 } from '@expo/vector-icons/'
 
 export function Dashboard() {
 
@@ -36,20 +33,15 @@ export function Dashboard() {
   const [serie, setserie] = useState('');
   const [userclass, setuserclass] = useState('');
   const [updateInfo, setUpudateInfo] = useState(false)
-
   const [vacancy, setVancancy] = useState({})
-
 
   useEffect(() => {
     async function initializeData() {
 
-      const data = await getData()
-      console.log(data)
-
+      const data = await getData();
       const image = await userImageLoad();
       const school = await getSchool(data[0].school_id);
       await saveSchool(school)
-
 
       setPicketImagePath(image.uri || '')
       setsName(data[0].name || '')
@@ -66,11 +58,7 @@ export function Dashboard() {
     async function getStatus() {
       const data = await loadVacancy()
       await setVancancy(data)
-      console.log('vacancy')
-
-      console.log(vacancy)
       setUpudateInfo(false)
-
     }
 
     getStatus()
@@ -80,11 +68,6 @@ export function Dashboard() {
   async function updateVacancy() {
     const dataVacancy = await updateVacancyRequest();
     setUpudateInfo(true)
-    console.log(dataVacancy)
-  }
-
-  function handleButton() {
-    navigation.navigate('UserForm');
   }
 
   return (
@@ -111,11 +94,11 @@ export function Dashboard() {
           </View>
 
           <View style={styles.schooldata}>
+
             <View style={styles.dataWrapper}>
               <Text style={styles.dataTitle}>Escola</Text>
               <Text style={styles.dataText}>{school}</Text>
             </View>
-            <View style={styles.spaceBetween}>
               <View style={styles.dataWrapper}>
                 <Text style={styles.dataTitle}>Turno</Text>
                 <Text style={styles.dataText}>{shift}</Text>
@@ -124,8 +107,6 @@ export function Dashboard() {
                 <Text style={styles.dataTitle}>Série</Text>
                 <Text style={styles.dataText}>{serie}</Text>
               </View>
-
-            </View>
 
             <View style={styles.dataWrapper}>
               <Text style={styles.dataTitle}>Turma</Text>
@@ -142,15 +123,15 @@ export function Dashboard() {
                     <View>
                     {
                       vacancy.status === 'in_progress' &&
-                      <Text style={[styles.dataText, { color: colors.color_secondary }]}>Pedido em análise</Text>
+                      <Text style={[styles.dataText, { color: colors.color_secondary, fontWeight: 'bold' }]}>Pedido em análise</Text>
                     }
                     {
                       vacancy.status === 'rejected' &&
-                      <Text style={[styles.dataText, { color: colors.color_warning }]}>Pedido indeferido</Text>
+                      <Text style={[styles.dataText, { color: colors.color_warning, fontWeight: 'bold' }]}>Pedido indeferido</Text>
                     }
                     {
                       vacancy.status === 'accepted' &&
-                      <Text style={[styles.dataText, { color: colors.green }]}>Pedido deferido</Text>
+                      <Text style={[styles.dataText, { color: colors.green, fontWeight: 'bold' }]}>Pedido deferido</Text>
                     }
                     </View>
                     <View style={styles.buttonIcon}>
@@ -210,13 +191,14 @@ const styles = StyleSheet.create({
   },
 
   userdata: {
-    borderWidth: 1,
-    borderColor: colors.gray_medium,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 10
   },
 
   ImageView: {
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center'
   },
 
@@ -232,7 +214,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.title,
     fontSize: 16,
     color: colors.gray,
-    marginBottom: 8
+    marginBottom: 8,
+    marginLeft: 16
 
   },
 

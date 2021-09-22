@@ -410,19 +410,19 @@ export function FirstAccessUserForm() {
               }>
 
               <Picker.Item label="Selecione a série" value="" />
-              <Picker.Item label="1º ano do ensino fundamental" value="1a" />
-              <Picker.Item label="2º ano do ensino fundamental" value="2a" />
-              <Picker.Item label="3º ano do ensino fundamental" value="3a" />
-              <Picker.Item label="4º ano do ensino fundamental" value="4a" />
-              <Picker.Item label="5º ano do ensino fundamental" value="5a" />
-              <Picker.Item label="6º ano do ensino fundamental" value="6a" />
-              <Picker.Item label="7º ano do ensino fundamental" value="7a" />
-              <Picker.Item label="8º ano do ensino fundamental" value="8a" />
-              <Picker.Item label="9º ano do ensino fundamental" value="9a" />
+              <Picker.Item label="1º ano do ensino fundamental" value="1º ano do ensino fundamental" />
+              <Picker.Item label="2º ano do ensino fundamental" value="2º ano do ensino fundamental" />
+              <Picker.Item label="3º ano do ensino fundamental" value="3º ano do ensino fundamental" />
+              <Picker.Item label="4º ano do ensino fundamental" value="4º ano do ensino fundamental" />
+              <Picker.Item label="5º ano do ensino fundamental" value="5º ano do ensino fundamental" />
+              <Picker.Item label="6º ano do ensino fundamental" value="6º ano do ensino fundamental" />
+              <Picker.Item label="7º ano do ensino fundamental" value="7º ano do ensino fundamental" />
+              <Picker.Item label="8º ano do ensino fundamental" value="8º ano do ensino fundamental" />
+              <Picker.Item label="9º ano do ensino fundamental" value="9º ano do ensino fundamental" />
               <Picker.Item  label="Ensino médio" color={colors.gray} />
-              <Picker.Item label="1º ano do ensino médio" value="1aM" />
-              <Picker.Item label="2º ano do ensino médio" value="2aM" />
-              <Picker.Item label="3º ano do ensino médio" value="3aM" />
+              <Picker.Item label="1º ano do ensino médio" value="1º ano do ensino médio" />
+              <Picker.Item label="2º ano do ensino médio" value="2º ano do ensino médio" />
+              <Picker.Item label="3º ano do ensino médio" value="3º ano do ensino médio" />
 
             </Picker>
           </View>

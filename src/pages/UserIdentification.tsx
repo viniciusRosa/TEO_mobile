@@ -15,7 +15,6 @@ import fonts from '../styles/fonts';
 import { BottonButton } from '../components/BottonButton';
 import { useNavigation } from '@react-navigation/core';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
 
 export function UserIdentification() {
@@ -29,14 +28,6 @@ export function UserIdentification() {
   const [isFilled, setIsFilled] = useState(false);
 
   const navigation = useNavigation();
-
-  useEffect(() => {
-    async function data() {
-      const emailSaved = await AsyncStorage.getItem('@teoapp:userEmail');
-      setEmail(emailSaved || '')
-    }
-    data()
-  }, [])
 
   async function handleSubmit() {
 
@@ -54,6 +45,7 @@ export function UserIdentification() {
       const { message } = await checkEmailDb(email);
 
       if (!message) {
+        await AsyncStorage.setItem('@teoapp:userEmail', email);
         navigation.navigate('Begin')
       } else {
         return Alert.alert('Este email já está cadastrado!');

@@ -4,13 +4,27 @@ import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 import { BottonButton } from '../components/BottonButton';
 import { useNavigation } from '@react-navigation/core';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export function Welcome() {
 
   const navigation = useNavigation();
 
-  function handleButton() {
-    navigation.navigate('UserIdentification');
+  async function handleButton() {
+    const student = await AsyncStorage.getItem('@teoapp:student');
+    console.log('RESULT -> ' + student)
+
+    if (student ===  null) {
+
+      navigation.navigate('UserIdentification');
+
+    } else {
+
+      navigation.navigate('Dashboard');
+    }
+
+
   }
 
   return (
