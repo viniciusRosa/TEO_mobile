@@ -16,13 +16,13 @@ import { useData } from '../contexts/DataContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteItem } from '../components/RouteItem';
 import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
 import MapViewDirections from 'react-native-maps-directions';
 import { googleApiKey } from '../../keys';
 import { Student } from '../types/Student';
 import { Route, Point } from '../types/Route';
 
 type WayPoint = {
+  name: string;
   latitude: number;
   longitude: number;
 }
@@ -66,7 +66,7 @@ export function OrderTransport() {
         let wapPointsFormated: WayPoint[] = [];
 
         filteredPoints.map( point => {
-          wapPointsFormated.push({latitude: Number(point.latitude), longitude: Number(point.longitude)})
+          wapPointsFormated.push({name: point.name, latitude: Number(point.latitude), longitude: Number(point.longitude)})
         } )
 
         setWaypoint(wapPointsFormated)
@@ -127,6 +127,7 @@ export function OrderTransport() {
               coordinate={{latitude: Number(student?.latitude), longitude: Number(student?.longitude)}}
               title={"Minha casa"}
               description={''}
+              pinColor={colors.gray_medium}
             />
 
             {routeSelected ? (
@@ -158,9 +159,18 @@ export function OrderTransport() {
                 coordinate={{latitude: Number(routeSelected.points[routeSelected.points.length -1].latitude),
                             longitude: Number(routeSelected.points[routeSelected.points.length -1].longitude)}}
                 title={"Final"}
-                pinColor={colors.green}
                 description={''}
               />
+
+              {waypoint.map((waypoint, index) => (
+                <Marker
+                  key={index}
+                  coordinate={waypoint}
+                  title={`Parada: ${waypoint.name}`}
+                  pinColor={colors.color_secondary}
+                />
+              ))}
+
               </>
 
                ) : <></>}

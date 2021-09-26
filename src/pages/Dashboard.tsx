@@ -66,7 +66,7 @@ export function Dashboard() {
 
     getStatus()
 
-  }, [updateInfo])
+  }, [updateInfo, isFocused])
 
   async function updateVacancy() {
     const dataVacancy = await updateVacancyRequest();

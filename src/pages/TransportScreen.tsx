@@ -17,8 +17,13 @@ import { loadVacancy } from '../libs/storage';
 import { Messages } from '../components/Messages'
 import { useData } from '../contexts/DataContext'
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons/'
+import { FontAwesome5 } from '@expo/vector-icons/'
 
+
+// ToDo
+
+// nao enviar mensagem vazia
+//
 
 
 export function TransporteScreen() {
