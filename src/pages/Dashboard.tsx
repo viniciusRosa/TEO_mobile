@@ -15,7 +15,9 @@ import unknownUser from '../assets/images/unknownUser.png'
 import { getData, userImageLoad, loadVacancy, saveSchool } from '../libs/storage';
 import { useData } from '../contexts/DataContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { FontAwesome5 } from '@expo/vector-icons/'
+import { FontAwesome5 } from '@expo/vector-icons/';
+import { useIsFocused } from '@react-navigation/native';
+
 
 export function Dashboard() {
 
@@ -25,6 +27,7 @@ export function Dashboard() {
   } = useData()
 
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   const [pickedImagePath, setPicketImagePath] = useState('');
   const [name, setsName] = useState('');
@@ -51,7 +54,7 @@ export function Dashboard() {
       setuserclass(data[0].classe || '')
     }
     initializeData()
-  }, [])
+  }, [school, pickedImagePath, isFocused])
 
   useEffect(() => {
 

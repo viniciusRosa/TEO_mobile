@@ -1,11 +1,10 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
-import { getData, userImageLoad, saveVacancy, loadVacancy } from '../libs/storage';
+import { getData, saveVacancy, loadVacancy, UserSchoolDataProps } from '../libs/storage';
 import { School } from '../types/School';
 import { Student } from '../types/Student';
 import { ImageType } from '../types/Image';
 import { AsyncStorage } from 'react-native';
-
 
 interface DataContextProps {
   checkEmailDb: (email: string) => {}
@@ -18,13 +17,14 @@ interface DataContextProps {
   sendMessage: (vacancyrequest: string, from: string, message: string) => void;
   updateVacancyRequest: () => object;
   loadRoutes: () => [];
-
+  updateSchoolData: (data: UserSchoolDataProps) => boolean;
 }
 
 export const DataContext = createContext<DataContextProps>({} as DataContextProps);
 
-export const DataProvider: React.FC = ({children, ...rest}) => {
+export const DataProvider: React.FC = ({ children, ...rest }) => {
 
+  const [update, setUpdate] = useState(false);
 
   async function checkEmailDb(email: string) {
     const { data } = await api.get(`/emailcheck/${email}`)
@@ -51,13 +51,10 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
     const vacancy = await loadVacancy();
     const vacancyRequest = await getVacancyRequest(vacancy.student_id)
     const saved = await saveVacancy(vacancyRequest)
-    console.log('foi')
-    console.log(vacancyRequest)
     return saved;
   }
 
   async function createStudent(data: Student, image: ImageType) {
-    // const image = await userImageLoad();
     const email = await AsyncStorage.getItem('@teoapp:userEmail')
 
     const user = new FormData();
@@ -85,9 +82,42 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
     return userSaved ? (JSON.parse(userSaved)) : {};
   }
 
+  async function updateSchoolData(data: UserSchoolDataProps) {
+    try {
+
+      const student = await getData();
+      console.log(data)
+      console.log('STUDENT ' + student[0].id)
+
+      if (data.classe === "") {
+        data.classe = student[0].classe;
+      }
+
+      if (data.series === "") {
+        data.series = student[0].series;
+      }
+
+      if (data.shift === "") {
+        data.shift = student[0].shift;
+      }
+
+      if (data.school_id === "") {
+        data.school_id = student[0].school_id;
+      }
+
+      const updatedStudent = await api.put(`/students/${student[0].id}`, data);
+      await AsyncStorage.setItem('@teoapp:student', JSON.stringify(updatedStudent.data))
+
+      return updatedStudent.data;
+
+    } catch (err) {
+      throw new Error('Dados não salvos')
+    }
+  }
+
   async function orderTransport(id: string, routeSelected: string) {
-    try{
-      const { data }  = await api.post('vacancyrequest', {
+    try {
+      const { data } = await api.post('vacancyrequest', {
         studentid: id,
         route: routeSelected,
         status: 'in_progress'
@@ -96,7 +126,7 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
       await saveVacancy(data[0]);
       return data;
 
-    } catch(err) {
+    } catch (err) {
 
       throw new Error(err)
 
@@ -134,7 +164,9 @@ export const DataProvider: React.FC = ({children, ...rest}) => {
         orderTransport,
         loadMessages,
         sendMessage,
-        updateVacancyRequest
+        updateVacancyRequest,
+
+        updateSchoolData
       }}
     >
       {children}

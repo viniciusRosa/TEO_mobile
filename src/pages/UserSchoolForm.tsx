@@ -7,24 +7,25 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  Button } from 'react-native';
+  Button
+} from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/core';
 import { useForm, Controller } from 'react-hook-form';
 import { Picker } from '@react-native-picker/picker';
 import { StyledInput } from '../components/StyledInput';
-import { UserSchoolDataProps, userSchoolSave } from '../libs/storage'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { useData } from '../contexts/DataContext';
 import { useEffect } from 'react';
+import { School } from '../types/School';
+import { saveSchool, UserSchoolDataProps } from '../libs/storage';
 
 export function UserSchoolForm() {
 
   const {
     getSchools,
-    createUser
+    getSchool,
+    updateSchoolData
   } = useData();
 
   const navigation = useNavigation();
@@ -33,62 +34,59 @@ export function UserSchoolForm() {
   const [selectedShift, setSelectedShift] = useState('');
   const [selectedSeries, setSelectedSeries] = useState('');
   const [empyFields, setEmpyFields] = useState(false)
-  const [schools, setSchools] = useState([])
+  const [schools, setSchools] = useState<School[]>([])
 
   useEffect(() => {
-    async function  loadSchools() {
-      const respose = await getSchools();
-      setSchools(respose);
+    async function loadSchools() {
+      const response = await getSchools();
+      setSchools(response);
     }
 
     loadSchools()
   }, [])
 
-  const { control, handleSubmit, formState: {errors} } = useForm<UserSchoolDataProps>();
+  const { control, handleSubmit, formState: { errors } } = useForm<UserSchoolDataProps>();
   const onSubmit = async (data: UserSchoolDataProps) => {
 
-    if (selectedSchool === '' || selectedShift === '') {
-      return setEmpyFields(true)
-    }
 
-    data.userSchool = selectedSchool;
-    data.userShift = selectedShift;
-    data.userSerie = selectedSeries
+    data.school_id = selectedSchool;
+    data.shift = selectedShift;
+    data.series = selectedSeries
 
     setEmpyFields(false)
 
-    console.log(data)
-
     try {
 
-      await userSchoolSave(data)
+      const result = await updateSchoolData(data);
+      console.log(result);
+      const school = await getSchool(result[0].school_id);
+      console.log(school);
 
-      const response = await createUser();
-      await AsyncStorage.setItem('@teoapp:userId', response[0].id)
+      await saveSchool(school)
 
       navigation.navigate('Confirmation', {
         title: 'Dados escolares salvos',
         icon: 'verified',
         text: '',
-        nextScreen: 'OrderTransport'
+        nextScreen: 'Dashboard'
       })
-    }catch (err) {
+    } catch (err) {
       console.log(err)
     }
   };
 
   return (
-      <View style={[styles.container, styles.androidSafeArea]}>
+    <View style={[styles.container, styles.androidSafeArea]}>
 
-        <View style={styles.header}>
-          <Text style={styles.title}>
-            Meus dados escolares
-          </Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          Meus dados escolares
+        </Text>
+      </View>
 
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-          <ScrollView style={[styles.body]}>
+        <ScrollView style={[styles.body]}>
 
           <View style={styles.pickerWrapper}>
             <Text style={styles.pickerTitle}>Escola em que estuda</Text>
@@ -137,48 +135,55 @@ export function UserSchoolForm() {
               }>
 
               <Picker.Item label="Selecione a série" value="" />
-              <Picker.Item label="1º ano" value="1a" />
-              <Picker.Item label="2º ano" value="2a" />
-              <Picker.Item label="3º ano" value="3a" />
-              <Picker.Item label="4º ano" value="4a" />
-              <Picker.Item label="5º ano" value="5a" />
-              <Picker.Item label="6º ano" value="6a" />
+              <Picker.Item label="1º ano do ensino fundamental" value="1º ano do ensino fundamental" />
+              <Picker.Item label="2º ano do ensino fundamental" value="2º ano do ensino fundamental" />
+              <Picker.Item label="3º ano do ensino fundamental" value="3º ano do ensino fundamental" />
+              <Picker.Item label="4º ano do ensino fundamental" value="4º ano do ensino fundamental" />
+              <Picker.Item label="5º ano do ensino fundamental" value="5º ano do ensino fundamental" />
+              <Picker.Item label="6º ano do ensino fundamental" value="6º ano do ensino fundamental" />
+              <Picker.Item label="7º ano do ensino fundamental" value="7º ano do ensino fundamental" />
+              <Picker.Item label="8º ano do ensino fundamental" value="8º ano do ensino fundamental" />
+              <Picker.Item label="9º ano do ensino fundamental" value="9º ano do ensino fundamental" />
+              <Picker.Item label="Ensino médio" color={colors.gray} />
+              <Picker.Item label="1º ano do ensino médio" value="1º ano do ensino médio" />
+              <Picker.Item label="2º ano do ensino médio" value="2º ano do ensino médio" />
+              <Picker.Item label="3º ano do ensino médio" value="3º ano do ensino médio" />
+
 
             </Picker>
           </View>
 
           <Controller
-              control={control}
-              render={({ field: {onChange, onBlur, value} }) => (
-                <StyledInput
-                  ask='Turma'
-                  placeholder=''
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-                  />
-              )}
-              name='class'
-              rules={{required: false}}
-              defaultValue= ''
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Turma'
+                placeholder=''
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='classe'
+            rules={{ required: false }}
+          />
+
+          {
+            empyFields ? <Text style={styles.errorText}>Escola e turno são campos obrigatórios</Text> : <Text></Text>
+          }
+
+          <View style={styles.submitButton}>
+            <Button
+              color={colors.green}
+              title='Salvar'
+              onPress={handleSubmit(onSubmit)}
             />
 
-            {
-              empyFields  ? <Text style={styles.errorText}>Escola e turno são campos obrigatórios</Text> : <Text></Text>
-            }
+          </View>
 
-            <View style={styles.submitButton}>
-              <Button
-                color={colors.green}
-                title='Salvar'
-                onPress={handleSubmit(onSubmit)}
-                />
-
-            </View>
-
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </View>
   )
 }
 
@@ -242,10 +247,10 @@ const styles = StyleSheet.create({
     marginTop: 64
   },
 
-  androidSafeArea: {
+  androerrorTextidSafeArea: {
     flex: 1,
-        backgroundColor: colors.white,
-        paddingTop: Platform.OS === 'android' ? 25 : 0
+    backgroundColor: colors.white,
+    paddingTop: Platform.OS === 'android' ? 25 : 0
   },
 
   submitButton: {

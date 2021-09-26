@@ -29,7 +29,6 @@ export function Login() {
   const { control, handleSubmit, formState: {errors} } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
-    console.log(data);
 
     if (data.email === undefined || data.password === undefined) {
 

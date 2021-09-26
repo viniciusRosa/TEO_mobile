@@ -46,10 +46,10 @@ export interface UserAdressProps {
 }
 
 export interface UserSchoolDataProps {
-  userSchool: string;
-  class: string;
-  userShift: string;
-  userSerie: string;
+  school_id: string;
+  classe: string;
+  shift: string;
+  series: string;
 
 }
 

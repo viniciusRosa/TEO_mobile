@@ -6,42 +6,39 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Dimensions
 } from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
-import { FontAwesome5 } from '@expo/vector-icons/'
+import { FontAwesome5 } from '@expo/vector-icons/';
 import { useNavigation } from '@react-navigation/core';
 import { useEffect } from 'react';
-
 import { loadSchool } from '../libs/storage';
-
+import { useIsFocused } from '@react-navigation/native';
 
 
 export function SchoolScreen() {
 
-  const [school, setSchool] = useState({})
+  const isFocused = useIsFocused();
+
+  const [school, setSchool] = useState({});
 
   const navigation = useNavigation();
 
-
-  useEffect(() => {
-    async function getSchool() {
-      const data = await loadSchool();
-      await setSchool(data)
-    }
-
-    getSchool()
-  }, [])
-
-  console.log(school)
-
-  function handleUserEdit() {
-    navigation.navigate('UserSchoolForm', {
-      first: false
-    })
+  async function getSchoolData() {
+    const data = await loadSchool();
+    await setSchool(data)
   }
 
+  useEffect(() => {
+    if (isFocused === true) {
+      getSchoolData();
+
+    }
+  }, [isFocused])
+
+  function handleUserEdit() {
+    navigation.navigate('UserSchoolForm')
+  }
 
   return (
     <View style={[styles.container, styles.androidSafeArea]}>
@@ -54,32 +51,32 @@ export function SchoolScreen() {
 
       <ScrollView style={[styles.body]}>
 
-      <View style={styles.schooldata}>
-            <View style={styles.dataWrapper}>
-              <Text style={styles.dataTitle}>Escola</Text>
-              <Text style={styles.dataText}>{school.name}</Text>
-            </View>
-
-            <View style={styles.dataWrapper}>
-              <Text style={styles.dataTitle}>Endereço</Text>
-              <Text style={styles.dataText}>{school.address}</Text>
-            </View>
-
-            <View style={styles.dataWrapper}>
-              <Text style={styles.dataTitle}>Numero</Text>
-              <Text style={styles.dataText}>{school.number}</Text>
-            </View>
-
-            <View style={styles.dataWrapper}>
-              <Text style={styles.dataTitle}>Contatos</Text>
-              <Text style={styles.dataText}>{school.phone}</Text>
-            </View>
-
-            <View style={styles.dataWrapper}>
-              <Text style={styles.dataTitle}>Email</Text>
-              <Text style={styles.dataText}>{school.email}</Text>
-            </View>
+        <View style={styles.schooldata}>
+          <View style={styles.dataWrapper}>
+            <Text style={styles.dataTitle}>Escola</Text>
+            <Text style={styles.dataText}>{school.name}</Text>
           </View>
+
+          <View style={styles.dataWrapper}>
+            <Text style={styles.dataTitle}>Endereço</Text>
+            <Text style={styles.dataText}>{school.address}</Text>
+          </View>
+
+          <View style={styles.dataWrapper}>
+            <Text style={styles.dataTitle}>Numero</Text>
+            <Text style={styles.dataText}>{school.number}</Text>
+          </View>
+
+          <View style={styles.dataWrapper}>
+            <Text style={styles.dataTitle}>Contatos</Text>
+            <Text style={styles.dataText}>{school.phone}</Text>
+          </View>
+
+          <View style={styles.dataWrapper}>
+            <Text style={styles.dataTitle}>Email</Text>
+            <Text style={styles.dataText}>{school.email}</Text>
+          </View>
+        </View>
 
         <View>
 
@@ -87,7 +84,7 @@ export function SchoolScreen() {
 
         <View style={styles.menuItens}>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={handleUserEdit}>
             <FontAwesome5 name="edit" size={24} color={colors.gray} />
             <Text style={styles.menuText}>Editar dados Escolares</Text>
           </TouchableOpacity>
@@ -139,32 +136,9 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 25 : 0
   },
 
-  ImageView: {
-    justifyContent: 'center',
-    alignItems: 'center',
-
-  },
-
-  map: {
-    width: Dimensions.get("window").width,
-    height: 200,
-    borderRadius: 160 / 2,
-    margin: 10,
-  },
-
-  thumbnail: {
-    width: 150,
-    height: 150,
-    borderRadius: 160 / 2,
-    margin: 10,
-    resizeMode: 'cover',
-  },
-
   menuItens: {
     marginTop: 24
   },
-
-
 
   menuItem: {
     flexDirection: 'row',
@@ -176,30 +150,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.title,
     color: colors.gray,
     marginLeft: 8
-  },
-
-  bodyText: {
-    marginVertical: 16,
-    marginHorizontal: 8
-  },
-
-  bodyTextTitle: {
-    fontFamily: fonts.title,
-    fontSize: 16,
-    color: colors.gray,
-    marginBottom: 8,
-    marginTop: 8
-
-  },
-
-  submitButton: {
-    marginVertical: 64
-  },
-
-  footer: {
-    position: 'absolute',
-    width: '100%',
-    bottom: 0
   },
 
   dataTitle: {

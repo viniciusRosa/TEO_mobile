@@ -13,7 +13,6 @@ export function Welcome() {
 
   async function handleButton() {
     const student = await AsyncStorage.getItem('@teoapp:student');
-    console.log('RESULT -> ' + student)
 
     if (student ===  null) {
 
