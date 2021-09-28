@@ -18,39 +18,84 @@ import { Messages } from '../components/Messages'
 import { useData } from '../contexts/DataContext'
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { FontAwesome5 } from '@expo/vector-icons/'
-
-
-// ToDo
-
-// nao enviar mensagem vazia
-//
-
+import MapView, { Marker } from 'react-native-maps';
+import { Student } from '../types/Student';
+import { googleApiKey } from '../../keys';
+import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Route } from '../types/Route';
+import { WayPoint } from './OrderTransport';
+import MapViewDirections from 'react-native-maps-directions';
 
 export function TransporteScreen() {
 
+  const navigation = useNavigation();
+  const GOOGLE_MAPS_APIKEY = googleApiKey;
+  const isFocused = useIsFocused();
+
+  const [student, setStudent] = useState<Student>();
+  const [route, setRoute] = useState<Route>();
+  const [waypoint, setWaypoint] = useState<WayPoint[]>([]);
   const [vacancy, setVancancy] = useState({})
   const [message, setMessage] = useState('')
   const [MessagesUpdate, setMessagesUpdate] = useState(false);
   const [messagesLoad, setMessagesLoad] = useState([]);
+  const [updateInfo, setUpudateInfo] = useState(false);
 
-  const [updateInfo, setUpudateInfo] = useState(false)
-
-
-  const navigation = useNavigation();
-
-  const { sendMessage, loadMessages, updateVacancyRequest } = useData()
-
+  const {
+    sendMessage,
+    loadMessages,
+    updateVacancyRequest,
+    loadRoute
+  } = useData()
 
   useEffect(() => {
     async function getStatus() {
-      const data = await loadVacancy()
+      const data = await loadVacancy();
       await setVancancy(data)
-      console.log(vacancy.id)
-      setUpudateInfo(false)
-
+      setUpudateInfo(false);
     }
-    getStatus()
+
+    async function getRoute() {
+      const response = await loadRoute(vacancy.route);
+
+      setRoute(response);
+    }
+
+    async function getStudent() {
+      const studentSaved = await AsyncStorage.getItem('@teoapp:student');
+      const studentParse = studentSaved ? (JSON.parse(studentSaved)) : {};
+      setStudent(studentParse[0])
+    }
+
+    getStatus();
+    getStudent();
+    getRoute();
+
+    setUpudateInfo(true);
+
+  }, [isFocused, updateInfo])
+
+  useEffect(() => {
+
+    function filterWaypoints() {
+
+      if (route) {
+        if (route.points.length > 2) {
+          const filteredPoints = route.points.slice(1, route.points.length - 1);
+          let wapPointsFormated: WayPoint[] = [];
+          filteredPoints.map(point => {
+            wapPointsFormated.push({ name: point.name, latitude: Number(point.latitude), longitude: Number(point.longitude) })
+          })
+          setWaypoint(wapPointsFormated)
+        }
+      }
+    }
+
+    filterWaypoints();
+    setUpudateInfo(false)
   }, [updateInfo])
+
 
   useEffect(() => {
     async function getMessages() {
@@ -58,16 +103,15 @@ export function TransporteScreen() {
       await setMessagesLoad(msgs)
       setMessagesUpdate(false)
       setUpudateInfo(false)
-
-      console.log(msgs)
     }
+
     getMessages()
   }, [MessagesUpdate, updateInfo])
+
 
   async function updateVacancy() {
     const dataVacancy = await updateVacancyRequest();
     setUpudateInfo(true)
-    console.log(dataVacancy)
   }
 
   async function handleMessage() {
@@ -76,7 +120,6 @@ export function TransporteScreen() {
     setMessage('')
     Alert.alert('Mensagem enviada')
     setMessagesUpdate(true)
-    console.log(message)
   }
 
   return (
@@ -121,71 +164,130 @@ export function TransporteScreen() {
         </View>
         <View>
 
-        {
-          vacancy.status === 'in_progress' &&
-          <View>
-            <View style={styles.wrapper}>
-              <View>
-                <Text style={styles.dataTitle}>Mensagens</Text>
+          {
+            vacancy.status === 'in_progress' &&
+            <View>
+              <View style={styles.wrapper}>
+                <View>
+                  <Text style={styles.dataTitle}>Mensagens</Text>
 
-                <ScrollView style={styles.msgView}>
+                  <ScrollView style={styles.msgView}>
 
 
-                  {
-                    messagesLoad.map((message) => {
+                    {
+                      messagesLoad.map((message) => {
 
-                      if (message.from_id === vacancy.student_id) {
-                        return (
-                          <View key={message.id} style={styles.msgDivStudent}>
-                            <Text style={styles.msgUserName}>Você</Text>
-                            <Text style={styles.msg}>{message.message}</Text>
-                          </View>
-                        )
-                      } else {
-                        return (
-                          <View key={message.id} style={styles.msgDiv}>
-                            <Text style={styles.msgUserServer}>Servidor</Text>
-                            <Text style={styles.msgServer}>{message.message}</Text>
-                          </View>
-                        )
-                      }
+                        if (message.from_id === vacancy.student_id) {
+                          return (
+                            <View key={message.id} style={styles.msgDivStudent}>
+                              <Text style={styles.msgUserName}>Você</Text>
+                              <Text style={styles.msg}>{message.message}</Text>
+                            </View>
+                          )
+                        } else {
+                          return (
+                            <View key={message.id} style={styles.msgDiv}>
+                              <Text style={styles.msgUserServer}>Servidor</Text>
+                              <Text style={styles.msgServer}>{message.message}</Text>
+                            </View>
+                          )
+                        }
 
-                    })
-                  }
+                      })
+                    }
 
-                </ScrollView>
+                  </ScrollView>
 
+                </View>
+              </View>
+
+              <View style={styles.submitButton}>
+                <TextInput
+                  style={styles.messageInput}
+                  placeholder='Mensagem'
+                  onChangeText={value => setMessage(value)}
+                  value={message}
+                />
+                <Button
+                  color={colors.green}
+                  onPress={handleMessage}
+                  title='Enviar'
+                />
               </View>
             </View>
 
-            <View style={styles.submitButton}>
-              <TextInput
-                style={styles.messageInput}
-                placeholder='Mensagem'
-                onChangeText={value => setMessage(value)}
-                value={message}
-              />
-              <Button
-                color={colors.green}
-                onPress={handleMessage}
-                title='Enviar'
-              />
+          }
+          {
+            vacancy.status === 'rejected' &&
+            <View>
+
             </View>
-          </View>
+          }
+          {
+            vacancy.status === 'accepted' &&
 
-        }
-        {
-          vacancy.status === 'rejected' &&
-          <View>
+            <View style={styles.mapWrapper}>
+              {student?.latitude && (
 
-          </View>
-        }
-        {
-          vacancy.status === 'accepted' &&
-          <View>
+                <MapView style={styles.map}
+                  initialRegion={{
+                    latitude: Number(student?.latitude),
+                    longitude: Number(student?.longitude),
+                    latitudeDelta: 0.050,
+                    longitudeDelta: 0.050
+                  }}
+                >
+                  <Marker
+                    coordinate={{ latitude: Number(student?.latitude), longitude: Number(student?.longitude) }}
+                    title={"Minha casa"}
+                    description={''}
+                    pinColor={colors.gray_medium}
+                  />
 
-          </View>
-        }
+                  <MapViewDirections
+                    origin={{
+                      latitude: Number(route.points[0].latitude),
+                      longitude: Number(route.points[0].longitude)
+                    }}
+                    waypoints={waypoint}
+                    destination={{
+                      latitude: Number(route.points[route.points.length - 1].latitude),
+                      longitude: Number(route.points[route.points.length - 1].longitude)
+                    }}
+                    apikey={GOOGLE_MAPS_APIKEY}
+                    strokeWidth={6}
+                    strokeColor={colors.green}
+                  />
+
+                  <Marker
+                    coordinate={{ latitude: Number(route.points[0].latitude), longitude: Number(route.points[0].longitude) }}
+                    title={"Início"}
+                    description={''}
+                  />
+
+                  <Marker
+                    coordinate={{
+                      latitude: Number(route.points[route.points.length - 1].latitude),
+                      longitude: Number(route.points[route.points.length - 1].longitude)
+                    }}
+                    title={"Final"}
+                    description={''}
+                  />
+
+                  {waypoint.map((waypoint, index) => (
+                    <Marker
+                    key={index}
+                    coordinate={waypoint}
+                    title={`Parada: ${waypoint.name}`}
+                    pinColor={colors.color_secondary}
+                  />
+              ))}
+
+                </MapView>
+
+              )}
+            </View>
+          }
 
         </View>
       </ScrollView>
@@ -230,35 +332,9 @@ const styles = StyleSheet.create({
 
   body: {
     flex: 1,
+    height: '100%',
     width: '86%',
     marginTop: 64
-  },
-
-  userdata: {
-    borderWidth: 1,
-    borderColor: colors.gray_medium,
-    borderRadius: 10
-  },
-
-  ImageView: {
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-
-  thumbnail: {
-    width: 120,
-    height: 120,
-    borderRadius: 160 / 2,
-    margin: 10,
-    resizeMode: 'cover',
-  },
-
-  bodyTextTitle: {
-    fontFamily: fonts.title,
-    fontSize: 16,
-    color: colors.gray,
-    marginBottom: 8
-
   },
 
   schooldata: {
@@ -272,12 +348,6 @@ const styles = StyleSheet.create({
 
   dataWrapper: {
     marginBottom: 16
-  },
-
-  spaceBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginRight: 132
   },
 
   dataTitle: {
@@ -372,8 +442,25 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginRight: 20
-  }
+  },
 
+  // MAP
+
+  map: {
+    width: '100%',
+    height: '100%',
+
+  },
+
+  mapWrapper: {
+    flex: 1,
+    height: 360,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: colors.gray_medium,
+    borderRadius: 10,
+    overflow: 'hidden'
+  }
 
 })
 

@@ -21,7 +21,7 @@ import { googleApiKey } from '../../keys';
 import { Student } from '../types/Student';
 import { Route, Point } from '../types/Route';
 
-type WayPoint = {
+export type WayPoint = {
   name: string;
   latitude: number;
   longitude: number;
@@ -151,7 +151,6 @@ export function OrderTransport() {
               <Marker
                 coordinate={{latitude: Number(routeSelected.points[0].latitude), longitude: Number(routeSelected.points[0].longitude)}}
                 title={"Início"}
-                pinColor={colors.green}
                 description={''}
               />
 

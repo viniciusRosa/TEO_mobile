@@ -5,6 +5,7 @@ import { School } from '../types/School';
 import { Student } from '../types/Student';
 import { ImageType } from '../types/Image';
 import { AsyncStorage } from 'react-native';
+import { Route } from '../types/Route';
 
 interface DataContextProps {
   checkEmailDb: (email: string) => {}
@@ -17,6 +18,7 @@ interface DataContextProps {
   sendMessage: (vacancyrequest: string, from: string, message: string) => void;
   updateVacancyRequest: () => object;
   loadRoutes: () => [];
+  loadRoute: (id: string) => Promise<any>;
   updateSchoolData: (data: UserSchoolDataProps) => boolean;
 }
 
@@ -152,10 +154,16 @@ export const DataProvider: React.FC = ({ children, ...rest }) => {
     return response.data;
   }
 
+  async function loadRoute(id: string) {
+    const response = await api.get(`routewithpoints/${id}`);
+    return response.data;
+  }
+
   return (
     <DataContext.Provider
       value={{
         checkEmailDb,
+        loadRoute,
         loadRoutes,
         getSchools,
         getSchool,
