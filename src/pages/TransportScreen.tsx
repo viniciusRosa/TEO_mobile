@@ -49,52 +49,56 @@ export function TransporteScreen() {
     loadRoute
   } = useData()
 
+  function filterWaypoints() {
+
+    if (route) {
+      if (route.points.length > 2) {
+        const filteredPoints = route.points.slice(1, route.points.length - 1);
+        let wapPointsFormated: WayPoint[] = [];
+        filteredPoints.map(point => {
+          wapPointsFormated.push({ name: point.name, latitude: Number(point.latitude), longitude: Number(point.longitude) })
+        })
+        setWaypoint(wapPointsFormated)
+      }
+    }
+  }
+
   useEffect(() => {
     async function getStatus() {
       const data = await loadVacancy();
       await setVancancy(data)
-      setUpudateInfo(false);
+      await setUpudateInfo(false);
     }
 
     async function getRoute() {
       const response = await loadRoute(vacancy.route);
 
-      setRoute(response);
+      await setRoute(response);
     }
 
     async function getStudent() {
       const studentSaved = await AsyncStorage.getItem('@teoapp:student');
       const studentParse = studentSaved ? (JSON.parse(studentSaved)) : {};
-      setStudent(studentParse[0])
+      await setStudent(studentParse[0])
     }
 
     getStatus();
     getStudent();
     getRoute();
 
-    setUpudateInfo(true);
 
-  }, [isFocused, updateInfo])
+    setUpudateInfo(false);
+
+  }, [updateInfo])
 
   useEffect(() => {
-
-    function filterWaypoints() {
-
-      if (route) {
-        if (route.points.length > 2) {
-          const filteredPoints = route.points.slice(1, route.points.length - 1);
-          let wapPointsFormated: WayPoint[] = [];
-          filteredPoints.map(point => {
-            wapPointsFormated.push({ name: point.name, latitude: Number(point.latitude), longitude: Number(point.longitude) })
-          })
-          setWaypoint(wapPointsFormated)
-        }
-      }
-    }
-
     filterWaypoints();
     setUpudateInfo(false)
-  }, [updateInfo])
+  }, [route])
+
+  useEffect(() => {
+    updateVacancy();
+  }, [])
 
 
   useEffect(() => {
@@ -227,64 +231,96 @@ export function TransporteScreen() {
             vacancy.status === 'accepted' &&
 
             <View style={styles.mapWrapper}>
-              {student?.latitude && (
 
-                <MapView style={styles.map}
-                  initialRegion={{
-                    latitude: Number(student?.latitude),
-                    longitude: Number(student?.longitude),
-                    latitudeDelta: 0.050,
-                    longitudeDelta: 0.050
-                  }}
-                >
-                  <Marker
-                    coordinate={{ latitude: Number(student?.latitude), longitude: Number(student?.longitude) }}
-                    title={"Minha casa"}
-                    description={''}
-                    pinColor={colors.gray_medium}
-                  />
 
-                  <MapViewDirections
-                    origin={{
-                      latitude: Number(route.points[0].latitude),
-                      longitude: Number(route.points[0].longitude)
+              {(student && route) && (
+                <>
+                  <View style={{
+                    alignItems: 'flex-start',
+                    justifyContent: 'flex-start',
+                    backgroundColor: 'white',
+                    width: '100%',
+                    height: '100%',
+                    position: 'absolute',
+                    opacity: 0.6,
+                    top: 280,
+                    zIndex: 1000
+
+                  }}>
+                    <View style={{
+                        width: '100%',
+                        paddingVertical: 8
+                        }}>
+                      <Text style={styles.title}>{route.name}</Text>
+
+                      <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
+                        <Text style={styles.title}>Horário: </Text>
+                        <Text style={{ marginRight: 8 }}>{route.timeDeparture}</Text>
+                        <FontAwesome5 style={{ marginRight: 8}} name="arrows-alt-h" size={24} color={colors.gray_medium} />
+                        <Text style={{ marginRight: 8 }}>{route.timeArrival}</Text>
+                      </View>
+
+                    </View>
+                  </View>
+
+                  <MapView style={styles.map}
+                    initialRegion={{
+                      latitude: Number(student?.latitude),
+                      longitude: Number(student?.longitude),
+                      latitudeDelta: 0.050,
+                      longitudeDelta: 0.050
                     }}
-                    waypoints={waypoint}
-                    destination={{
-                      latitude: Number(route.points[route.points.length - 1].latitude),
-                      longitude: Number(route.points[route.points.length - 1].longitude)
-                    }}
-                    apikey={GOOGLE_MAPS_APIKEY}
-                    strokeWidth={6}
-                    strokeColor={colors.green}
-                  />
+                  >
 
-                  <Marker
-                    coordinate={{ latitude: Number(route.points[0].latitude), longitude: Number(route.points[0].longitude) }}
-                    title={"Início"}
-                    description={''}
-                  />
-
-                  <Marker
-                    coordinate={{
-                      latitude: Number(route.points[route.points.length - 1].latitude),
-                      longitude: Number(route.points[route.points.length - 1].longitude)
-                    }}
-                    title={"Final"}
-                    description={''}
-                  />
-
-                  {waypoint.map((waypoint, index) => (
                     <Marker
-                    key={index}
-                    coordinate={waypoint}
-                    title={`Parada: ${waypoint.name}`}
-                    pinColor={colors.color_secondary}
-                  />
-              ))}
+                      coordinate={{ latitude: Number(student?.latitude), longitude: Number(student?.longitude) }}
+                      title={"Minha casa"}
+                      description={''}
+                      pinColor={colors.gray_medium}
+                    />
 
-                </MapView>
 
+                    <MapViewDirections
+                      origin={{
+                        latitude: Number(route.points[0].latitude),
+                        longitude: Number(route.points[0].longitude)
+                      }}
+                      waypoints={waypoint}
+                      destination={{
+                        latitude: Number(route.points[route.points.length - 1].latitude),
+                        longitude: Number(route.points[route.points.length - 1].longitude)
+                      }}
+                      apikey={GOOGLE_MAPS_APIKEY}
+                      strokeWidth={6}
+                      strokeColor={colors.green}
+                    />
+
+                    <Marker
+                      coordinate={{ latitude: Number(route.points[0].latitude), longitude: Number(route.points[0].longitude) }}
+                      title={"Início"}
+                      description={''}
+                    />
+
+                    <Marker
+                      coordinate={{
+                        latitude: Number(route.points[route.points.length - 1].latitude),
+                        longitude: Number(route.points[route.points.length - 1].longitude)
+                      }}
+                      title={"Final"}
+                      description={''}
+                    />
+
+                    {waypoint.map((waypoint, index) => (
+                      <Marker
+                        key={index}
+                        coordinate={waypoint}
+                        title={`Parada: ${waypoint.name}`}
+                        pinColor={colors.color_secondary}
+                      />
+                    ))}
+
+                  </MapView>
+                </>
               )}
             </View>
           }

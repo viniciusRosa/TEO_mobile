@@ -80,11 +80,6 @@ export function UserScreen() {
             <Text style={styles.menuText}>Dados Pessoais</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <FontAwesome5 name="edit" size={24} color={colors.gray} />
-            <Text style={styles.menuText}>Endereço</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <MaterialIcons name="logout" size={24} color={colors.gray} />
             <Text style={styles.menuText}>Sair</Text>
