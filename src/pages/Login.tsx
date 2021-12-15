@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Button,
+  TouchableOpacity,
   Alert} from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
@@ -47,12 +48,16 @@ export function Login() {
 
   };
 
+  function forgotPassword() {
+    navigation.navigate('Login')
+  }
+
   return (
       <View style={[styles.container, styles.androidSafeArea]}>
 
         <View style={styles.header}>
           <Text style={styles.title}>
-            Fazer Login
+            Login
           </Text>
         </View>
 
@@ -94,6 +99,11 @@ export function Login() {
 
 
             <View style={styles.submitButton}>
+            <TouchableOpacity style={styles.loginButton} onPress={forgotPassword}>
+              <Text style={styles.loginButtonText}>
+                Esqueci minha senha.
+            </Text>
+            </TouchableOpacity>
               <Button
                 color={colors.green}
                 title='Entrar'
@@ -190,5 +200,17 @@ const styles = StyleSheet.create({
     width: '100%',
     bottom: 0
   },
+
+  loginButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+
+  loginButtonText: {
+    color: colors.gray_medium,
+    fontFamily: fonts.text_medium,
+    fontWeight: 'bold'
+  }
 })
 

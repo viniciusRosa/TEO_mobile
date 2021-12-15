@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,37 +9,77 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  Button } from 'react-native';
+  Button,
+  Alert
+} from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
-import { useNavigation, useRoute } from '@react-navigation/core';
+import { useNavigation } from '@react-navigation/core';
 import { useForm, Controller } from 'react-hook-form';
-
 import * as ImagePicker from 'expo-image-picker';
-
-import unknownUser from '../assets/images/unknownUser.png'
+import { Picker } from '@react-native-picker/picker';
+import unknownUser from '../assets/images/unknownUser.png';
 import { StyledInputText } from '../components/StyledInputText';
-
-interface FormData {
-  name: string;
-  rg: string;
-  cpf: string;
-  borndate: string;
-}
+import { StyledInput } from '../components/StyledInput';
+import { useData } from '../contexts/DataContext';
+import {
+  UserStudentDataProps,
+  userImageLoad,
+  userImageSave
+} from '../libs/storage'
+import { ImageType } from '../types/Image';
 
 export function UserEditForm() {
+
+  const {
+    updateStudentData
+  } = useData();
+
+  const activeValidation = false
   const navigation = useNavigation();
 
   const [pickedImagePath, setPicketImagePath] = useState('');
+  const [deficiencyInfo, setDeficiencyInfo] = useState('');
+  const [deficiency, setDeficiency] = useState(false);
+  const [image, setImage] = useState<ImageType>(unknownUser);
 
-  const { control, handleSubmit, formState: {errors} } = useForm<FormData>();
-  const onSubmit = (data: FormData) => {
-    console.log(data);
-    navigation.navigate('Confirmation', {
-      title: 'Dados Salvos',
-      icon: 'verified',
-      nextScreen: 'UserScreen'
-    })
+  const [ufs, setUfs] = useState(['RS']);
+  const [selectedUf, setSelectedUf] = useState('RS');
+  const [cities, setCities] = useState(['Arroio do Sal', 'Balneário Pinhal', 'Capão da Canoa',
+        'Caraá', 'Cidreira', 'Imbé', 'Maquiné', 'Osório', 'Palmares do Sul', 'Pinhal', 'Santo Antônio da Patrulha',
+        'Tramandaí', 'Xangri-lá']);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [empyFields, setEmpyFields] = useState(false);
+
+
+  useEffect(() => {
+    async function imageRecovery() {
+      const {uri} = await userImageLoad();
+      setPicketImagePath(uri ? uri : '')
+    }
+    imageRecovery()
+  }, [])
+
+  const { control, handleSubmit, formState: { errors } } = useForm<UserStudentDataProps>({});
+
+  const onSubmit = async (data: UserStudentDataProps) => {
+
+    data.deficiencyInfo = deficiencyInfo;
+    data.uf = selectedUf;
+    data.city = selectedCity;
+
+
+      try{
+        const user = updateStudentData(data, image);
+        navigation.navigate('Confirmation', {
+          title: 'Dados Salvos',
+          icon: 'verified',
+          nextScreen: 'Dashboard',
+        })
+
+    } catch (err) {
+      Alert.alert('Algo deu Errado')
+    }
   };
 
   const openCamera = async () => {
@@ -59,107 +99,266 @@ export function UserEditForm() {
     const result = await ImagePicker.launchCameraAsync();
 
     if (!result.cancelled) {
-      setPicketImagePath(result.uri);
-      console.log(result.uri);
+      const photo = {
+        uri: result.uri,
+        type: 'image/jpg',
+        name: 'studentPhoto.jpg'
+      }
+      setImage(photo);
+      await userImageSave(photo)
     }
   }
 
   return (
-      <View style={[styles.container, styles.androidSafeArea]}>
+    <View style={[styles.container, styles.androidSafeArea]}>
 
-        <View style={styles.header}>
-          <Text style={styles.title}>
-            Editar perfil
-          </Text>
-        </View>
-
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-
-          <ScrollView style={[styles.body]}>
-
-            <View style={styles.ImageView}>
-              <TouchableOpacity style={styles.camera} onPress={openCamera}>
-                {
-                  pickedImagePath === ''
-                    ? <Image source={unknownUser} style={styles.thumbnail} />
-                    : <Image source={{ uri: String(pickedImagePath)}} style={styles.thumbnail}/>
-                }
-
-              </TouchableOpacity>
-              <Text style={styles.bodyTextTitle}> Foto </Text>
-            </View>
-
-            {/* <Controller
-              control={control}
-              render={({ field: {onChange, onBlur, value} }) => (
-                <StyledInputText
-                  ask='Nome Completo'
-                  placeholder='Nome'
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-                  />
-              )}
-              name='name'
-              rules={{required: true}}
-            />
-
-            <Controller
-              control={control}
-              render={({ field: {onChange, onBlur, value} }) => (
-                <StyledInputText
-                  ask='Número do RG'
-                  placeholder='RG'
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-                  />
-              )}
-              name='rg'
-              rules={{required: true}}
-            />
-
-            <Controller
-              control={control}
-              render={({ field: {onChange, onBlur, value} }) => (
-                <StyledInputText
-                  ask='Número do CPF'
-                  placeholder='CPF'
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-                  />
-              )}
-              name='cpf'
-              rules={{required: true}}
-            />
-
-            <Controller
-              control={control}
-              render={({ field: {onChange, onBlur, value} }) => (
-                <StyledInputText
-                  ask='Data de nascimento'
-                  placeholder='DD/MM/AAAA'
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-                  />
-              )}
-              name='borndate'
-              rules={{required: true}}
-            /> */}
-
-            <View style={styles.submitButton}>
-              <Button
-                color={colors.green}
-                title='Salvar'
-                onPress={handleSubmit(onSubmit)}
-                />
-
-            </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          Meu perfil
+        </Text>
       </View>
+
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
+        <ScrollView style={[styles.body]}>
+
+          <View style={styles.ImageView}>
+
+            <TouchableOpacity style={styles.camera} onPress={openCamera}>
+              {
+                image?.uri
+                ? <Image source={{ uri: image?.uri }} style={styles.thumbnail} />
+                : <Image source={unknownUser} style={styles.thumbnail} />
+              }
+
+            </TouchableOpacity>
+
+            <Text style={styles.bodyTextTitle}> Foto </Text>
+          </View>
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Nome Completo'
+                placeholder='Nome'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='name'
+            rules={{ required: activeValidation }}
+          />
+          {errors.name && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInputText
+                type={'custom'}
+                options={{
+                  mask: '999.999.99-99'
+                }}
+                ask='Número do RG'
+                placeholder='RG'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='rg'
+            rules={{ required: activeValidation }}
+          />
+          {errors.rg && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInputText
+                type={'cpf'}
+                ask='Número do CPF'
+                placeholder='CPF'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='cpf'
+            rules={{ required: activeValidation }}
+          />
+          {errors.cpf && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInputText
+                type={'datetime'}
+                options={{
+                  format: 'DD/MM/YYYY'
+                }}
+                ask='Data de nascimento'
+                placeholder='DD/MM/AAAA'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='borndate'
+            rules={{ required: activeValidation }}
+          />
+          {errors.borndate && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Portador de deficiência</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={deficiency}
+              onValueChange={(itemValue, itemIndex) =>
+                setDeficiency(itemValue)
+              }>
+
+              <Picker.Item label="Não" value={false} />
+              <Picker.Item label="Sim" value={true} />
+            </Picker>
+          </View>
+
+          {deficiency
+            ? (
+              <StyledInput
+                ask='Qual?'
+                placeholder=''
+                onChangeText={value => setDeficiencyInfo(value)}
+                value={deficiencyInfo}
+              />
+            )
+            : (
+              <View></View>
+            )
+          }
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                secureTextEntry={true}
+                ask='Defina uma senha'
+                placeholder=''
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='password'
+            rules={{ required: activeValidation }}
+          />
+          {errors.password && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Endereço'
+                placeholder='Ex: Rua...'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='address'
+            rules={{ required: activeValidation }}
+          />
+          {errors.address && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Numero'
+                placeholder='Ex: 111'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+                keyboardType='numeric'
+              />
+            )}
+            name='number'
+            rules={{ required: activeValidation }}
+          />
+          {errors.number && <Text style={styles.errorText}> Este campo é obrigatorrio</Text>}
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <StyledInput
+                ask='Complemento'
+                placeholder='Ex: ap 111 bloco A...'
+                onBlur={onBlur}
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name='complement'
+            rules={{ required: false }}
+            defaultValue=''
+          />
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Estado</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedUf}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedUf(itemValue)
+              }>
+
+              <Picker.Item label="Selecione o Estado" value="" />
+              {
+                ufs.map(uf => {
+                  return (
+                    <Picker.Item key={uf} label={uf} value={uf} />
+                  )
+                })
+              }
+            </Picker>
+          </View>
+
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerTitle}>Cidade</Text>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedCity}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedCity(itemValue)
+              }>
+              <Picker.Item label="Selecione a cidade" value="" />
+              {
+                cities.map(city => {
+                  return (
+                    <Picker.Item key={city} label={city} value={city} />
+                  )
+                })
+              }
+
+            </Picker>
+          </View>
+
+          {
+            empyFields ? <Text style={styles.errorText}>Estado e cidade são campos obrigatórios</Text> : <Text></Text>
+          }
+
+          <View style={styles.submitButton}>
+            <Button
+              color={colors.green}
+              title='Salvar'
+              onPress={handleSubmit(onSubmit)}
+            />
+          </View>
+
+
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </View>
   )
 }
 
@@ -199,8 +398,8 @@ const styles = StyleSheet.create({
 
   androidSafeArea: {
     flex: 1,
-        backgroundColor: colors.white,
-        paddingTop: Platform.OS === 'android' ? 25 : 0
+    backgroundColor: colors.white,
+    paddingTop: Platform.OS === 'android' ? 25 : 0
   },
 
   ImageView: {
@@ -223,12 +422,6 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 
-
-  bodyText: {
-    marginVertical: 16,
-    marginHorizontal: 8
-  },
-
   bodyTextTitle: {
     fontFamily: fonts.title,
     fontSize: 16,
@@ -241,10 +434,37 @@ const styles = StyleSheet.create({
     marginVertical: 64
   },
 
-  footer: {
-    position: 'absolute',
+  pickerTitle: {
     width: '100%',
-    bottom: 0
+    fontSize: 16,
+    marginTop: 36,
+    color: colors.gray,
+    fontFamily: fonts.title,
+    fontWeight: 'bold',
+    textAlign: 'left',
   },
-})
 
+  picker: {
+    color: colors.gray,
+    marginTop: 16,
+    fontFamily: fonts.title,
+  },
+
+  pickerWrapper: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray_medium,
+    borderRadius: 5,
+    marginTop: 16,
+    width: '100%',
+    padding: 10,
+    textAlign: 'left'
+  },
+
+  errorText: {
+    marginTop: 16,
+    color: 'red',
+    fontWeight: 'bold'
+
+  }
+
+})

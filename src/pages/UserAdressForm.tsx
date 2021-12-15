@@ -178,7 +178,7 @@ export function UserAdressForm() {
               onValueChange={(itemValue, itemIndex) =>
                 setSelectedCity(itemValue)
               }>
-              <Picker.Item label="Selecione o Estado" value="" />
+              <Picker.Item label="Selecione a cidade" value="" />
               {
                 cities.map(city => {
                   return (

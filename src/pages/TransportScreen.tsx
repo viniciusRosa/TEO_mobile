@@ -131,7 +131,7 @@ export function TransporteScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>
-          Meu Transporte
+          Transporte
         </Text>
       </View>
 
@@ -253,12 +253,12 @@ export function TransporteScreen() {
                         }}>
                       <Text style={styles.title}>{route.name}</Text>
 
-                      <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
+                      {/* <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
                         <Text style={styles.title}>Horário: </Text>
                         <Text style={{ marginRight: 8 }}>{route.timeDeparture}</Text>
                         <FontAwesome5 style={{ marginRight: 8}} name="arrows-alt-h" size={24} color={colors.gray_medium} />
                         <Text style={{ marginRight: 8 }}>{route.timeArrival}</Text>
-                      </View>
+                      </View> */}
 
                     </View>
                   </View>

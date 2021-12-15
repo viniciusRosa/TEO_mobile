@@ -73,14 +73,14 @@ export function RouteItem({
               </Text>
 
             </View>
-            <View style={{ flexDirection: 'row', marginTop: 5 }}>
+            {/* <View style={{ flexDirection: 'row', marginTop: 5 }}>
               <Text style={styles.title}>Horário: </Text>
               <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ marginRight: 8 }}>{data.timeDeparture}</Text>
                 <FontAwesome5 style={{ marginRight: 8 }} name="arrows-alt-h" size={24} color={colors.gray_medium} />
                 <Text style={{ marginRight: 8 }}>{data.timeArrival}</Text>
               </View>
-            </View>
+            </View> */}
 
             <View>
               <Text style={styles.title}>Rota: </Text>

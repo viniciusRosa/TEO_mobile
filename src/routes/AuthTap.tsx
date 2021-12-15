@@ -26,7 +26,7 @@ const AuthTab = () => (
     }}>
 
       <AppTap.Screen
-        name='Dashboard'
+        name='Carteira digital'
         component={Dashboard}
         options={{
           tabBarIcon: ({ size, color }) => (
@@ -36,7 +36,7 @@ const AuthTab = () => (
        />
 
       <AppTap.Screen
-        name='Acadêmico'
+        name='Escola'
         component={SchoolScreen}
         options={{
           tabBarIcon: ({ size, color }) => (
@@ -65,15 +65,15 @@ const AuthTab = () => (
         }}
        />
 
-      <AppTap.Screen
+      {/* <AppTap.Screen
         name='Teste'
         component={TestPage}
         options={{
           tabBarIcon: ({ size, color }) => (
-            <FontAwesome5 name='bug' size={size} color={color} />
+            <FontAwesome5 name='user-alt' size={size} color={color} />
           )
         }}
-       />
+       /> */}
 
 
   </AppTap.Navigator>

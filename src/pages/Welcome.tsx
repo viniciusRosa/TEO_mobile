@@ -31,7 +31,7 @@ export function Welcome() {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            Bem vindo {'\n'}
+            Bem-vindo {'\n'}
             ao {'\n'}
             TEO
           </Text>

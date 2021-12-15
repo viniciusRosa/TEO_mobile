@@ -10,6 +10,20 @@ export interface Ifile {
   uri: string;
 }
 
+export interface UserStudentDataProps {
+  name: string;
+  rg: string;
+  cpf: string;
+  borndate: string;
+  password: string;
+  deficiencyInfo: string;
+  address: string;
+  number: string;
+  complement: string;
+  uf: string;
+  city: string;
+}
+
 export interface CreateUserDadasProps {
   name: string;
   rg: string;

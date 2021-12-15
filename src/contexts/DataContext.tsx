@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
-import { getData, saveVacancy, loadVacancy, UserSchoolDataProps } from '../libs/storage';
+import {
+  getData,
+  saveVacancy,
+  loadVacancy,
+  UserSchoolDataProps,
+  UserStudentDataProps
+} from '../libs/storage';
 import { School } from '../types/School';
 import { Student } from '../types/Student';
 import { ImageType } from '../types/Image';
@@ -20,6 +26,7 @@ interface DataContextProps {
   loadRoutes: () => [];
   loadRoute: (id: string) => Promise<any>;
   updateSchoolData: (data: UserSchoolDataProps) => boolean;
+  updateStudentData: (data: UserStudentDataProps, image: ImageType) => void;
 }
 
 export const DataContext = createContext<DataContextProps>({} as DataContextProps);
@@ -56,7 +63,7 @@ export const DataProvider: React.FC = ({ children, ...rest }) => {
     return saved;
   }
 
-  async function createStudent(data: Student, image: ImageType) {
+  async function createStudent(data: Student, image?: ImageType) {
     const email = await AsyncStorage.getItem('@teoapp:userEmail')
 
     const user = new FormData();
@@ -88,8 +95,6 @@ export const DataProvider: React.FC = ({ children, ...rest }) => {
     try {
 
       const student = await getData();
-      console.log(data)
-      console.log('STUDENT ' + student[0].id)
 
       if (data.classe === "") {
         data.classe = student[0].classe;
@@ -111,6 +116,107 @@ export const DataProvider: React.FC = ({ children, ...rest }) => {
       await AsyncStorage.setItem('@teoapp:student', JSON.stringify(updatedStudent.data))
 
       return updatedStudent.data;
+
+    } catch (err) {
+      throw new Error('Dados não salvos')
+    }
+  }
+
+  async function updateStudentData(data: UserStudentDataProps, image: ImageType) {
+    try {
+
+      const student = await getData();
+
+      const user = new FormData();
+      if (typeof image === 'object') {
+        user.append('image', image)
+      }
+
+      if ( data.name !== undefined ) {
+        if (data.name !== '') {
+
+          user.append('name', data.name)
+        }
+      }
+
+      if ( data.rg !== undefined ) {
+        if (data.rg !== '') {
+
+          user.append('rg', data.rg)
+        }
+      }
+
+      if ( data.cpf !== undefined ) {
+        if (data.cpf !== '') {
+
+          user.append('cpf', data.cpf)
+        }
+      }
+
+      if ( data.borndate !== undefined ) {
+        if (data.borndate !== '') {
+
+          user.append('borndate', data.borndate)
+        }
+      }
+
+      if ( data.password !== undefined ) {
+        if (data.password !== '') {
+
+          user.append('password', data.password)
+        }
+      }
+
+      if ( data.deficiencyInfo !== undefined ) {
+        if (data.deficiencyInfo !== '') {
+
+          user.append('deficiencyInfo', data.deficiencyInfo)
+        }
+      }
+
+      if ( data.address !== undefined ) {
+        if (data.address !== '') {
+
+          user.append('address', data.address)
+        }
+      }
+
+      if ( data.number !== undefined ) {
+        if (data.number !== '') {
+
+          user.append('number', data.number)
+        }
+      }
+
+      if ( data.complement !== undefined ) {
+        if (data.complement !== '') {
+
+          user.append('complement', data.complement)
+        }
+      }
+
+      if ( data.uf !== undefined ) {
+        if (data.uf !== '') {
+
+          user.append('uf', data.uf)
+        }
+      }
+
+      if ( data.city !== undefined ) {
+        if (data.city !== '') {
+
+          user.append('city', data.city)
+        }
+      }
+
+      console.log(user)
+
+
+    const response = await api.put(`/students/${student[0].id}`, user);
+    await AsyncStorage.setItem('@teoapp:student', JSON.stringify(response.data))
+    const userSaved = await AsyncStorage.getItem('@teoapp:student');
+    return userSaved ? (JSON.parse(userSaved)) : {};
+      // return updatedStudent.data;
 
     } catch (err) {
       throw new Error('Dados não salvos')
@@ -173,7 +279,7 @@ export const DataProvider: React.FC = ({ children, ...rest }) => {
         loadMessages,
         sendMessage,
         updateVacancyRequest,
-
+        updateStudentData,
         updateSchoolData
       }}
     >

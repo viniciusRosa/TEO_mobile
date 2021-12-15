@@ -45,7 +45,7 @@ export function SchoolScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>
-          Minha escola
+          Escola
         </Text>
       </View>
 

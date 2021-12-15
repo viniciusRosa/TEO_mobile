@@ -58,7 +58,7 @@ export function UserScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>
-          Meu perfil
+          Usuário
         </Text>
       </View>
 
